@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>תיחום AOI — מיפוי פוטוגרמטרי</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/tabler-icons.min.css" />
+<style>
+:root {
+  --bg: #ffffff; --bg2: #f5f4f1; --bg3: #ebe9e4;
+  --txt: #1a1a18; --txt2: #6b6a66; --txt3: #9a9893;
+  --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.18);
+  --purple: #534AB7; --purple-light: #EEEDFE; --purple-dark: #3C3489;
+  --success: #1D9E75; --success-light: #EAF3DE; --success-txt: #3B6D11;
+  --danger: #E24B4A; --danger-light: #FCEBEB; --danger-txt: #A32D2D;
+  --amber-light: #FAEEDA; --amber-txt: #854F0B;
+  --rmd: 8px; --rlg: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1e1c; --bg2: #282825; --bg3: #121211;
+    --txt: #f0efec; --txt2: #b0aea8; --txt3: #7d7b76;
+    --border: rgba(255,255,255,0.09); --border2: rgba(255,255,255,0.18);
+    --purple-light: #2a2660; --success-light: #0a3020; --success-txt: #97C459;
+    --danger-light: #3a1010; --danger-txt: #F09595;
+    --amber-light: #3a2000; --amber-txt: #FAC775;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: var(--bg3); color: var(--txt); height: 100%; }
+body { display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.topbar-title { font-size: 15px; font-weight: 500; flex: 1; min-width: 150px; }
+.topbar-sub { font-size: 12px; color: var(--txt2); }
+
+.layout { display: flex; flex: 1; overflow: hidden; }
+@media (max-width: 700px) { .layout { flex-direction: column; } }
+
+#map { flex: 1; min-height: 400px; z-index: 0; }
+
+.sidebar { width: 320px; flex-shrink: 0; background: var(--bg); border-right: 0.5px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+@media (max-width: 700px) { .sidebar { width: 100%; border-right: none; border-top: 0.5px solid var(--border); max-height: 55vh; } }
+
+.panel { padding: 0.875rem; border-bottom: 0.5px solid var(--border); }
+.panel-title { font-size: 13px; font-weight: 500; color: var(--txt); margin-bottom: 0.625rem; display: flex; align-items: center; gap: 6px; }
+.panel-title i { font-size: 15px; color: var(--purple); }
+
+.field { margin-bottom: 0.625rem; }
+.field label { display: block; font-size: 12px; color: var(--txt2); margin-bottom: 3px; }
+.field select, .field input[type=text], .field input[type=file] {
+  width: 100%; font-size: 13px; padding: 7px 10px; border-radius: var(--rmd);
+  border: 0.5px solid var(--border2); background: var(--bg); color: var(--txt);
+}
+.field input[type=file] { padding: 5px 8px; cursor: pointer; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 14px; font-size: 13px; border-radius: var(--rmd); cursor: pointer; border: 0.5px solid var(--border2); background: var(--bg); color: var(--txt); width: 100%; margin-bottom: 6px; }
+.btn:hover { background: var(--bg2); }
+.btn-primary { background: var(--purple); color: #fff; border-color: var(--purple); }
+.btn-primary:hover { background: var(--purple-dark); }
+.btn-danger { background: var(--danger-light); color: var(--danger-txt); border-color: var(--danger); }
+.btn-danger:hover { opacity: 0.85; }
+
+.chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.chip { padding: 4px 10px; border: 0.5px solid var(--border2); border-radius: 20px; font-size: 12px; cursor: pointer; color: var(--txt2); background: var(--bg); user-select: none; }
+.chip.active { background: var(--purple-light); border-color: var(--purple); color: var(--purple-dark); }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-card { background: var(--bg2); border-radius: var(--rmd); padding: 0.625rem; text-align: center; }
+.stat-label { font-size: 11px; color: var(--txt2); margin-bottom: 2px; }
+.stat-val { font-size: 18px; font-weight: 500; color: var(--txt); }
+.stat-sub { font-size: 10px; color: var(--txt3); }
+
+.alert { padding: 8px 10px; border-radius: var(--rmd); font-size: 12px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 6px; }
+.alert-info { background: var(--purple-light); color: var(--purple-dark); }
+.alert-warn { background: var(--amber-light); color: var(--amber-txt); }
+.alert-success { background: var(--success-light); color: var(--success-txt); }
+.alert-err { background: var(--danger-light); color: var(--danger-txt); }
+.alert i { margin-top: 1px; flex-shrink: 0; }
+
+.coords-box { background: var(--bg2); border-radius: var(--rmd); padding: 8px; font-size: 11px; font-family: monospace; max-height: 100px; overflow-y: auto; color: var(--txt2); margin-bottom: 8px; white-space: pre-wrap; word-break: break-all; }
+
+.hidden { display: none !important; }
+.tag { display: inline-block; background: var(--purple-light); color: var(--purple-dark); border-radius: 20px; padding: 2px 8px; font-size: 11px; }
+
+.tool-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.tool-row .btn { margin-bottom: 0; }
+
+.measure-info { font-size: 12px; color: var(--txt2); background: var(--bg2); border-radius: var(--rmd); padding: 6px 10px; margin-bottom: 6px; }
+
+.leaflet-draw-toolbar a { border-radius: var(--rmd) !important; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title"><i class="ti ti-map-2" aria-hidden="true"></i> תיחום AOI — מיפוי פוטוגרמטרי</div>
+    <div class="topbar-sub">ציור פוליגון ידני או העלאת קובץ SHP/GeoJSON</div>
+  </div>
+  <a href="mihshvon-tashumot-mipui.html" class="btn" style="width:auto;"><i class="ti ti-arrow-right" aria-hidden="true"></i> למחשבון תשומות</a>
+</div>
+
+<div class="layout">
+  <div id="map"></div>
+
+  <div class="sidebar">
+
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-pencil" aria-hidden="true"></i> ציור פוליגון ידני</div>
+      <div class="alert alert-info">
+        <i class="ti ti-info-circle" aria-hidden="true"></i>
+        <span>לחץ על כפתור הציור במפה (משמאל למעלה) ↖ לציור פוליגון. לחץ שוב על הנקודה הראשונה לסגירה.</span>
+      </div>
+      <button class="btn" onclick="activateDraw()"><i class="ti ti-vector-triangle" aria-hidden="true"></i> התחל ציור פוליגון</button>
+      <button class="btn btn-danger hidden" id="btn-clear" onclick="clearAll()"><i class="ti ti-trash" aria-hidden="true"></i> נקה הכל</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-upload" aria-hidden="true"></i> העלאת קובץ</div>
+      <div class="field">
+        <label>רשת קואורדינטות של הקובץ</label>
+        <div class="chip-row">
+          <span class="chip active" onclick="setCRS('itm',this)" id="crs-itm">רשת ישראל חדשה (ITM)</span>
+          <span class="chip" onclick="setCRS('wgs84',this)" id="crs-wgs">גיאוגרפי WGS84</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>סוג קובץ</label>
+        <div class="chip-row">
+          <span class="chip active" onclick="setFileType('geojson',this)">GeoJSON / SHP-ZIP</span>
+          <span class="chip" onclick="setFileType('csv',this)">CSV קואורדינטות</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>בחר קובץ</label>
+        <input type="file" id="file-input" accept=".geojson,.json,.zip,.csv" onchange="handleFile(this)" />
+      </div>
+      <div id="file-status"></div>
+      <div class="alert alert-warn hidden" id="crs-warn">
+        <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+        <span>קובץ SHP DWG מלא דורש המרה חיצונית ל-GeoJSON. מומלץ להשתמש ב-<strong>mapshaper.org</strong> — העלה את ה-SHP, ייצא כ-GeoJSON, ואז העלה כאן.</span>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="stats-panel">
+      <div class="panel-title"><i class="ti ti-chart-area" aria-hidden="true"></i> נתוני הפוליגון</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">שטח</div>
+          <div class="stat-val" id="stat-sqkm">—</div>
+          <div class="stat-sub">קמ״ר</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">שטח</div>
+          <div class="stat-val" id="stat-dunam">—</div>
+          <div class="stat-sub">דונם</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">היקף</div>
+          <div class="stat-val" id="stat-perim">—</div>
+          <div class="stat-sub">ק״מ</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">נקודות</div>
+          <div class="stat-val" id="stat-pts">—</div>
+          <div class="stat-sub">קודקודים</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:12px; color:var(--txt2); margin-bottom:4px;">מרכז הפוליגון (WGS84)</div>
+        <div class="coords-box" id="center-coords">—</div>
+        <button class="btn" onclick="copyCoords()"><i class="ti ti-copy" aria-hidden="true"></i> העתק קואורדינטות</button>
+        <button class="btn btn-primary" onclick="sendToCalc()"><i class="ti ti-calculator" aria-hidden="true"></i> שלח שטח למחשבון ↗</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-ruler-2" aria-hidden="true"></i> סרגל מדידה</div>
+      <div class="measure-info" id="measure-info">לחץ על כפתור המדידה ← לציור קו על המפה ומדידת מרחק ושטח.</div>
+      <div class="tool-row">
+        <button class="btn" onclick="activateMeasureLine()"><i class="ti ti-line" aria-hidden="true"></i> מרחק</button>
+        <button class="btn" onclick="activateMeasureArea()"><i class="ti ti-square" aria-hidden="true"></i> שטח</button>
+        <button class="btn btn-danger" onclick="clearMeasure()"><i class="ti ti-x" aria-hidden="true"></i> נקה</button>
+      </div>
+      <div id="measure-result" class="hidden">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label" id="m-label">מרחק</div>
+            <div class="stat-val" id="m-val">—</div>
+            <div class="stat-sub" id="m-unit">ק״מ</div>
+          </div>
+          <div class="stat-card hidden" id="m-area-card">
+            <div class="stat-label">שטח</div>
+            <div class="stat-val" id="m-area-val">—</div>
+            <div class="stat-sub">קמ״ר</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-layers-difference" aria-hidden="true"></i> שכבת רקע</div>
+      <div class="chip-row">
+        <span class="chip active" onclick="setLayer('osm',this)">OSM רגיל</span>
+        <span class="chip" onclick="setLayer('sat',this)">לוויין (ESRI)</span>
+        <span class="chip" onclick="setLayer('topo',this)">טופוגרפי</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+const MAP_CENTER = [31.5, 34.9];
+const MAP_ZOOM = 8;
+
+const LAYERS = {
+  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }),
+  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© ESRI', maxZoom: 19 }),
+  topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: '© OpenTopoMap', maxZoom: 17 })
+};
+
+const map = L.map('map', { center: MAP_CENTER, zoom: MAP_ZOOM, layers: [LAYERS.osm] });
+
+const drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+const measureItems = new L.FeatureGroup();
+map.addLayer(measureItems);
+
+const drawControl = new L.Control.Draw({
+  edit: { featureGroup: drawnItems },
+  draw: {
+    polygon: { shapeOptions: { color: '#534AB7', fillColor: '#534AB7', fillOpacity: 0.15, weight: 2 } },
+    polyline: false, rectangle: false, circle: false, marker: false, circlemarker: false
+  }
+});
+map.addControl(drawControl);
+
+let currentCRS = 'itm';
+let currentFileType = 'geojson';
+let measureMode = null;
+let measurePoints = [];
+let measureLayer = null;
+let currentLayer = 'osm';
+
+map.on(L.Draw.Event.CREATED, function(e) {
+  drawnItems.clearLayers();
+  measureItems.clearLayers();
+  drawnItems.addLayer(e.layer);
+  updateStats(e.layer.toGeoJSON());
+  document.getElementById('btn-clear').classList.remove('hidden');
+});
+
+map.on(L.Draw.Event.EDITED, function(e) {
+  e.layers.eachLayer(layer => updateStats(layer.toGeoJSON()));
+});
+
+function setCRS(crs, el) {
+  currentCRS = crs;
+  document.querySelectorAll('[onclick^="setCRS"]').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setFileType(ft, el) {
+  currentFileType = ft;
+  document.querySelectorAll('[onclick^="setFileType"]').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setLayer(name, el) {
+  map.removeLayer(LAYERS[currentLayer]);
+  currentLayer = name;
+  map.addLayer(LAYERS[name]);
+  document.querySelectorAll('[onclick^="setLayer"]').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function activateDraw() {
+  new L.Draw.Polygon(map, drawControl.options.draw.polygon).enable();
+}
+
+function clearAll() {
+  drawnItems.clearLayers();
+  measureItems.clearLayers();
+  document.getElementById('stats-panel').classList.add('hidden');
+  document.getElementById('btn-clear').classList.add('hidden');
+  document.getElementById('measure-result').classList.add('hidden');
+  document.getElementById('measure-info').textContent = 'לחץ על כפתור המדידה לציור קו על המפה.';
+  measurePoints = [];
+  measureLayer = null;
+  measureMode = null;
+}
+
+function clearMeasure() {
+  measureItems.clearLayers();
+  document.getElementById('measure-result').classList.add('hidden');
+  measurePoints = [];
+  measureLayer = null;
+  measureMode = null;
+  document.getElementById('measure-info').textContent = 'לחץ על כפתור המדידה לציור קו על המפה.';
+}
+
+function activateMeasureLine() {
+  measureMode = 'line';
+  measurePoints = [];
+  measureItems.clearLayers();
+  document.getElementById('measure-info').textContent = 'לחץ על המפה להוסיף נקודות. לחץ פעמיים לסיום.';
+  map.once('click', startMeasure);
+}
+
+function activateMeasureArea() {
+  measureMode = 'area';
+  measurePoints = [];
+  measureItems.clearLayers();
+  document.getElementById('measure-info').textContent = 'לחץ על המפה להוסיף נקודות לפוליגון. לחץ פעמיים לסיום.';
+  map.once('click', startMeasure);
+}
+
+function startMeasure(e) {
+  measurePoints.push([e.latlng.lat, e.latlng.lng]);
+  if (measureLayer) measureItems.removeLayer(measureLayer);
+  if (measureMode === 'line') {
+    measureLayer = L.polyline(measurePoints, { color: '#1D9E75', weight: 2, dashArray: '5,5' }).addTo(measureItems);
+  } else {
+    measureLayer = L.polygon(measurePoints, { color: '#1D9E75', fillColor: '#1D9E75', fillOpacity: 0.1, weight: 2, dashArray: '5,5' }).addTo(measureItems);
+  }
+  map.on('click', addMeasurePoint);
+  map.on('dblclick', finishMeasure);
+}
+
+function addMeasurePoint(e) {
+  measurePoints.push([e.latlng.lat, e.latlng.lng]);
+  if (measureLayer) measureItems.removeLayer(measureLayer);
+  if (measureMode === 'line') {
+    measureLayer = L.polyline(measurePoints, { color: '#1D9E75', weight: 2, dashArray: '5,5' }).addTo(measureItems);
+  } else {
+    measureLayer = L.polygon(measurePoints, { color: '#1D9E75', fillColor: '#1D9E75', fillOpacity: 0.1, weight: 2, dashArray: '5,5' }).addTo(measureItems);
+  }
+}
+
+function finishMeasure(e) {
+  map.off('click', addMeasurePoint);
+  map.off('dblclick', finishMeasure);
+  const result = document.getElementById('measure-result');
+  const areaCard = document.getElementById('m-area-card');
+  if (measureMode === 'line') {
+    const dist = calcLineDistance(measurePoints);
+    document.getElementById('m-label').textContent = 'מרחק';
+    document.getElementById('m-val').textContent = dist < 1 ? (dist * 1000).toFixed(0) : dist.toFixed(2);
+    document.getElementById('m-unit').textContent = dist < 1 ? 'מ׳' : 'ק״מ';
+    areaCard.classList.add('hidden');
+  } else {
+    const dist = calcLineDistance([...measurePoints, measurePoints[0]]);
+    const area = calcPolygonArea(measurePoints);
+    document.getElementById('m-label').textContent = 'היקף';
+    document.getElementById('m-val').textContent = dist.toFixed(2);
+    document.getElementById('m-unit').textContent = 'ק״מ';
+    document.getElementById('m-area-val').textContent = area.toFixed(3);
+    areaCard.classList.remove('hidden');
+  }
+  result.classList.remove('hidden');
+  document.getElementById('measure-info').textContent = 'מדידה הושלמה.';
+}
+
+function calcLineDistance(points) {
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = L.latLng(points[i]);
+    const b = L.latLng(points[i+1]);
+    total += a.distanceTo(b);
+  }
+  return total / 1000;
+}
+
+function calcPolygonArea(points) {
+  const R = 6371;
+  let area = 0;
+  const n = points.length;
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    const lat1 = points[i][0] * Math.PI / 180;
+    const lat2 = points[j][0] * Math.PI / 180;
+    const lon1 = points[i][1] * Math.PI / 180;
+    const lon2 = points[j][1] * Math.PI / 180;
+    area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
+  }
+  return Math.abs(area * R * R / 2);
+}
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('file-status');
+  const warnEl = document.getElementById('crs-warn');
+  statusEl.innerHTML = '';
+  warnEl.classList.add('hidden');
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'zip') {
+    warnEl.classList.remove('hidden');
+    statusEl.innerHTML = '<div class="alert alert-warn"><i class="ti ti-alert-triangle"></i> קובץ SHP-ZIP: נסה המרה ל-GeoJSON תחילה באמצעות mapshaper.org</div>';
+    return;
+  }
+
+  if (ext === 'csv') {
+    const reader = new FileReader();
+    reader.onload = e => loadCSV(e.target.result);
+    reader.readAsText(file, 'UTF-8');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      let geojson = JSON.parse(e.target.result);
+      if (currentCRS === 'itm') geojson = convertITMtoWGS84GeoJSON(geojson);
+      loadGeoJSON(geojson);
+      statusEl.innerHTML = '<div class="alert alert-success"><i class="ti ti-check"></i> הקובץ נטען בהצלחה</div>';
+    } catch(err) {
+      statusEl.innerHTML = '<div class="alert alert-err"><i class="ti ti-x"></i> שגיאה בקריאת הקובץ: ' + err.message + '</div>';
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function loadCSV(text) {
+  const statusEl = document.getElementById('file-status');
+  try {
+    const lines = text.trim().split('\n');
+    const coords = [];
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(',');
+      if (parts.length < 2) continue;
+      let x = parseFloat(parts[0]), y = parseFloat(parts[1]);
+      if (currentCRS === 'itm') { const wgs = itmToWGS84(x, y); x = wgs.lon; y = wgs.lat; }
+      coords.push([x, y]);
+    }
+    if (coords.length < 3) { statusEl.innerHTML = '<div class="alert alert-err"><i class="ti ti-x"></i> לא מספיק נקודות בקובץ (מינימום 3)</div>'; return; }
+    const geojson = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords.map(c => [c[0], c[1]])] }, properties: {} };
+    loadGeoJSON(geojson);
+    statusEl.innerHTML = '<div class="alert alert-success"><i class="ti ti-check"></i> ' + (coords.length) + ' נקודות נטענו</div>';
+  } catch(e) {
+    statusEl.innerHTML = '<div class="alert alert-err"><i class="ti ti-x"></i> שגיאה ב-CSV: ' + e.message + '</div>';
+  }
+}
+
+function loadGeoJSON(geojson) {
+  drawnItems.clearLayers();
+  const layer = L.geoJSON(geojson, {
+    style: { color: '#534AB7', fillColor: '#534AB7', fillOpacity: 0.15, weight: 2 }
+  });
+  drawnItems.addLayer(layer);
+  map.fitBounds(layer.getBounds(), { padding: [40, 40] });
+  updateStats(geojson);
+  document.getElementById('btn-clear').classList.remove('hidden');
+}
+
+function updateStats(geojson) {
+  let coords = [];
+  if (geojson.type === 'Feature') {
+    coords = geojson.geometry.coordinates[0];
+  } else if (geojson.type === 'Polygon') {
+    coords = geojson.coordinates[0];
+  } else if (geojson.type === 'FeatureCollection' && geojson.features.length > 0) {
+    const g = geojson.features[0].geometry;
+    coords = g.type === 'Polygon' ? g.coordinates[0] : (g.coordinates[0][0] || []);
+  }
+  if (!coords || coords.length < 3) return;
+
+  const latlngs = coords.map(c => [c[1], c[0]]);
+  const areaKm2 = calcPolygonArea(latlngs);
+  const perimKm = calcLineDistance([...latlngs, latlngs[0]]);
+  const centerLat = latlngs.reduce((s, p) => s + p[0], 0) / latlngs.length;
+  const centerLon = latlngs.reduce((s, p) => s + p[1], 0) / latlngs.length;
+
+  document.getElementById('stat-sqkm').textContent = areaKm2.toFixed(3);
+  document.getElementById('stat-dunam').textContent = Math.round(areaKm2 * 1000);
+  document.getElementById('stat-perim').textContent = perimKm.toFixed(2);
+  document.getElementById('stat-pts').textContent = coords.length - 1;
+  document.getElementById('center-coords').textContent = centerLat.toFixed(6) + ', ' + centerLon.toFixed(6);
+  document.getElementById('stats-panel').classList.remove('hidden');
+
+  localStorage.setItem('aoi_area_sqkm', areaKm2.toFixed(4));
+  localStorage.setItem('aoi_area_dunam', Math.round(areaKm2 * 1000));
+}
+
+function copyCoords() {
+  const text = document.getElementById('center-coords').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(text);
+  const btn = event.target.closest('button');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-check"></i> הועתק';
+  setTimeout(() => btn.innerHTML = orig, 1500);
+}
+
+function sendToCalc() {
+  const sqkm = localStorage.getItem('aoi_area_sqkm');
+  if (!sqkm) return;
+  localStorage.setItem('aoi_send_area', sqkm);
+  localStorage.setItem('aoi_send_unit', 'sqkm');
+  alert('השטח ' + parseFloat(sqkm).toFixed(3) + ' קמ״ר הועבר. פתח את מחשבון התשומות — הוא יטען את הנתון אוטומטית.');
+  window.location.href = 'mihshvon-tashumot-mipui.html';
+}
+
+function itmToWGS84(E, N) {
+  const a = 6378137.0, b = 6356752.3141;
+  const e2 = (a*a - b*b) / (a*a);
+  const n0 = 1500000, e0 = 219529.584;
+  const phi0 = 31.7343936111 * Math.PI / 180;
+  const lam0 = 35.2045169444 * Math.PI / 180;
+  const k0 = 1.0000067, false_N = -3512424.1, false_E = 0;
+  const n = (a - b) / (a + b);
+  const n2 = n*n, n3 = n2*n, n4 = n3*n;
+  const G = a*(1 - n)*(1 - n2)*(1 + 9*n2/4 + 225*n4/64)*Math.PI/180;
+  const sigma = (N - n0) / (k0 * G) * Math.PI / 180;
+  const phi_foot = sigma + (3*n/2 - 27*n3/32)*Math.sin(2*sigma) + (21*n2/16 - 55*n4/32)*Math.sin(4*sigma) + (151*n3/96)*Math.sin(6*sigma) + (1097*n4/512)*Math.sin(8*sigma);
+  const sinPF = Math.sin(phi_foot), cosPF = Math.cos(phi_foot), tanPF = Math.tan(phi_foot);
+  const nu = a / Math.sqrt(1 - e2*sinPF*sinPF);
+  const rho = a*(1-e2) / Math.pow(1 - e2*sinPF*sinPF, 1.5);
+  const eta2 = nu/rho - 1;
+  const x = (E - e0) / (k0 * nu);
+  const x2 = x*x;
+  const lat = phi_foot - (nu*tanPF/rho)*(x2/2 - (5 + 3*tanPF*tanPF + eta2 - 9*eta2*tanPF*tanPF)*x2*x2/24 + (61 + 90*tanPF*tanPF + 45*Math.pow(tanPF,4))*Math.pow(x2,3)/720);
+  const lon = lam0 + (x - (1 + 2*tanPF*tanPF + eta2)*x2*x/6 + (5 - 2*eta2 + 28*tanPF*tanPF - 3*eta2*eta2 + 8*eta2*tanPF*tanPF + 24*Math.pow(tanPF,4))*x2*x2*x/120) / cosPF;
+  return { lat: lat * 180/Math.PI, lon: lon * 180/Math.PI };
+}
+
+function convertITMtoWGS84GeoJSON(geojson) {
+  function convertCoord(c) {
+    if (Array.isArray(c[0])) return c.map(convertCoord);
+    const w = itmToWGS84(c[0], c[1]);
+    return [w.lon, w.lat];
+  }
+  function convertGeom(g) {
+    return { ...g, coordinates: convertCoord(g.coordinates) };
+  }
+  if (geojson.type === 'FeatureCollection') {
+    return { ...geojson, features: geojson.features.map(f => ({ ...f, geometry: convertGeom(f.geometry) })) };
+  }
+  if (geojson.type === 'Feature') return { ...geojson, geometry: convertGeom(geojson.geometry) };
+  return convertGeom(geojson);
+}
+
+const savedArea = localStorage.getItem('aoi_area_sqkm');
+if (savedArea) {
+  document.getElementById('stats-panel').classList.remove('hidden');
+  document.getElementById('stat-sqkm').textContent = parseFloat(savedArea).toFixed(3);
+  document.getElementById('stat-dunam').textContent = Math.round(parseFloat(savedArea) * 1000);
+}
+</script>
+</body>
+</html>
