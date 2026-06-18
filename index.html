@@ -1,234 +1,196 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>מחשבון תשומות מיפוי פוטוגרמטרי</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/tabler-icons.min.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>מחשבון תשומות מיפוי</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/tabler-icons.min.css"/>
 <style>
-  :root {
-    --color-background-primary: #ffffff;
-    --color-background-secondary: #f5f4f1;
-    --color-background-tertiary: #ebe9e4;
-    --color-background-info: #E6F1FB;
-    --color-text-primary: #1a1a18;
-    --color-text-secondary: #6b6a66;
-    --color-text-tertiary: #9a9893;
-    --color-text-info: #0C447C;
-    --color-text-success: #3B6D11;
-    --color-text-danger: #A32D2D;
-    --color-border-tertiary: rgba(0,0,0,0.08);
-    --color-border-secondary: rgba(0,0,0,0.16);
-    --border-radius-md: 8px;
-    --border-radius-lg: 12px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  }
+:root{
+  --bg:#fff;--bg2:#f5f4f1;--bg3:#ebe9e4;
+  --txt:#1a1a18;--txt2:#6b6a66;--txt3:#9a9893;
+  --brd:rgba(0,0,0,.08);--brd2:rgba(0,0,0,.16);
+  --pur:#534AB7;--pur-l:#EEEDFE;--pur-d:#3C3489;
+  --grn:#1D9E75;--grn-l:#EAF3DE;--grn-t:#3B6D11;
+  --red:#E24B4A;--red-l:#FCEBEB;--red-t:#A32D2D;
+  --amb-l:#FAEEDA;--amb-t:#854F0B;
+  --rmd:8px;--rlg:12px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1e1e1c;--bg2:#282825;--bg3:#121211;--txt:#f0efec;--txt2:#b0aea8;--txt3:#7d7b76;
+  --brd:rgba(255,255,255,.08);--brd2:rgba(255,255,255,.16);
+  --pur-l:#2a2660;--grn-l:#0a3020;--grn-t:#97C459;--red-l:#3a1010;--red-t:#F09595;--amb-l:#3a2000;--amb-t:#FAC775;}
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:var(--font);background:var(--bg3);color:var(--txt);}
+body{padding:1rem;}
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-background-primary: #1e1e1c;
-      --color-background-secondary: #282825;
-      --color-background-tertiary: #121211;
-      --color-background-info: #0C447C;
-      --color-text-primary: #f0efec;
-      --color-text-secondary: #b0aea8;
-      --color-text-tertiary: #7d7b76;
-      --color-text-info: #B5D4F4;
-      --color-text-success: #97C459;
-      --color-text-danger: #F09595;
-      --color-border-tertiary: rgba(255,255,255,0.08);
-      --color-border-secondary: rgba(255,255,255,0.16);
-    }
-  }
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--bg2);border-radius:var(--rlg);padding:4px;}
+.tab{flex:1;padding:8px;font-size:13px;font-weight:500;border:none;background:none;cursor:pointer;border-radius:var(--rmd);color:var(--txt2);}
+.tab.active{background:var(--bg);color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { font-family: var(--font-sans); background: var(--color-background-tertiary); color: var(--color-text-primary); }
-  body { padding: 1rem; }
+.page{max-width:680px;margin:0 auto;}
+.section{background:var(--bg);border:.5px solid var(--brd);border-radius:var(--rlg);padding:1rem;margin-bottom:.875rem;}
+.sec-title{font-size:14px;font-weight:500;margin-bottom:.875rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.field{margin-bottom:.75rem;}
+.field label{display:block;font-size:13px;color:var(--txt2);margin-bottom:4px;}
+.field input,.field select,.field textarea{width:100%;font-size:14px;padding:8px 10px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);}
+.field textarea{resize:vertical;min-height:56px;font-family:var(--font);}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:440px){.row{grid-template-columns:1fr;}}
 
-  .page { max-width: 640px; margin: 0 auto; direction: rtl; }
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:.5px solid var(--brd2);border-radius:20px;cursor:pointer;font-size:13px;color:var(--txt2);background:var(--bg);user-select:none;}
+.chip.active{background:var(--pur-l);border-color:var(--pur);color:var(--pur-d);}
+.chip-group{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+.rbtn{padding:6px 13px;border:.5px solid var(--brd2);border-radius:20px;cursor:pointer;font-size:13px;color:var(--txt2);background:var(--bg);user-select:none;}
+.rbtn.active{background:var(--pur-l);border-color:var(--pur);color:var(--pur-d);}
+.igroup{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
 
-  .section { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-bottom: 0.875rem; }
-  .section-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.875rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .field { margin-bottom: 0.75rem; }
-  .field label { display: block; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
-  .field input, .field select, .field textarea {
-    width: 100%; font-size: 14px; padding: 8px 10px; border-radius: var(--border-radius-md);
-    border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary);
-    min-height: 36px;
-  }
-  .field textarea { resize: vertical; min-height: 60px; font-family: var(--font-sans); }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid #534AB7; outline-offset: 1px; }
+/* Terrain */
+.t-row{border-bottom:.5px solid var(--brd);padding:7px 0;}
+.t-row:last-child{border-bottom:none;}
+.t-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px;}
+.t-name{font-size:13px;color:var(--txt2);flex:1;}
+.t-pct{width:62px;font-size:13px;text-align:center;padding:5px;}
+.t-computed{font-size:12px;color:var(--txt3);}
+.bar-wrap{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-top:10px;}
+.bar-fill{height:8px;background:var(--pur);border-radius:4px;transition:width .2s;}
+.sum-line{font-size:13px;margin-top:7px;display:flex;align-items:center;gap:8px;}
 
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 420px) { .row { grid-template-columns: 1fr; } }
+/* Buttons */
+.btn-primary{width:100%;padding:12px;font-size:15px;font-weight:500;background:var(--pur);color:#fff;border:none;border-radius:var(--rmd);cursor:pointer;margin-top:.5rem;}
+.btn-primary:hover{background:var(--pur-d);}
+.btn-sec{width:100%;padding:9px;font-size:13px;background:var(--bg);color:var(--txt);border:.5px solid var(--brd2);border-radius:var(--rmd);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-sec:hover{background:var(--bg2);}
+.btn-danger{background:var(--red-l);color:var(--red-t);border-color:var(--red);}
+.btn-danger:hover{opacity:.85;}
+.btn-sm{padding:5px 12px;font-size:12px;border:.5px solid var(--brd2);border-radius:20px;cursor:pointer;background:var(--bg);color:var(--txt2);}
+.btn-sm:hover{background:var(--bg2);}
 
-  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: 20px; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); background: var(--color-background-primary); user-select: none; }
-  .chip.active { background: #EEEDFE; border-color: #534AB7; color: #3C3489; }
-  .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .inline-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .radio-btn { padding: 6px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: 20px; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); background: var(--color-background-primary); user-select: none; }
-  .radio-btn.active { background: #EEEDFE; border-color: #534AB7; color: #3C3489; }
+/* Results */
+.results{background:var(--bg2);border:.5px solid var(--brd);border-radius:var(--rlg);padding:1rem;margin-top:.875rem;}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;}
+.metric-card{background:var(--bg);border-radius:var(--rmd);padding:.875rem;text-align:center;}
+.metric-card.full{grid-column:1/-1;}
+.metric-label{font-size:12px;color:var(--txt2);margin-bottom:4px;}
+.metric-val{font-size:22px;font-weight:500;}
+.metric-sub{font-size:11px;color:var(--txt3);margin-top:2px;}
+.bdrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--brd);gap:8px;font-size:13px;}
+.bdrow:last-child{border:none;font-weight:500;}
+.bdrow>span:first-child{color:var(--txt2);}
+.cbadge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:12px;font-weight:500;}
+.c-low{background:var(--grn-l);color:var(--grn-t);}
+.c-med{background:var(--amb-l);color:var(--amb-t);}
+.c-high{background:var(--red-l);color:var(--red-t);}
+.share-row{display:flex;gap:7px;margin-top:.875rem;flex-wrap:wrap;}
+.share-row .btn-sec{flex:1;min-width:100px;}
+@media(max-width:440px){.share-row .btn-sec{flex:1 1 100%;}}
 
-  .terrain-row { border-bottom: 0.5px solid var(--color-border-tertiary); padding: 8px 0; }
-  .terrain-row:last-child { border-bottom: none; }
-  .terrain-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
-  .terrain-name { font-size: 13px; color: var(--color-text-secondary); flex: 1; }
-  .terrain-pct-input { width: 64px; font-size: 13px; text-align: center; flex-shrink: 0; padding: 6px; }
-  .terrain-computed { font-size: 12px; color: var(--color-text-tertiary); }
-  .terrain-bar-wrap { width: 100%; height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; margin-top: 12px; }
-  .terrain-bar-fill { height: 8px; background: #534AB7; border-radius: 4px; transition: width 0.2s; }
-  .sum-line { font-size: 13px; margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .sum-ok { color: var(--color-text-success); }
-  .sum-err { color: var(--color-text-danger); }
+/* History table */
+.hist-table{width:100%;border-collapse:collapse;font-size:12px;}
+.hist-table th{text-align:right;padding:6px 8px;font-size:11px;color:var(--txt2);font-weight:500;border-bottom:.5px solid var(--brd2);white-space:nowrap;}
+.hist-table td{padding:6px 8px;border-bottom:.5px solid var(--brd);vertical-align:top;}
+.hist-table tr:last-child td{border-bottom:none;}
+.hist-table tr:hover td{background:var(--bg2);}
+.hist-actions{display:flex;gap:4px;justify-content:flex-end;}
+.tag-sm{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;}
 
-  .other-text { margin-top: 8px; }
-  .other-text.hidden { display: none; }
+/* Undo banner */
+.undo-banner{background:var(--amb-l);color:var(--amb-t);border-radius:var(--rmd);padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:.875rem;}
 
-  .calc-btn { width: 100%; padding: 13px; font-size: 15px; font-weight: 500; background: #534AB7; color: #ffffff; border: none; border-radius: var(--border-radius-md); cursor: pointer; margin-top: 0.5rem; }
-  .calc-btn:active { background: #3C3489; }
-  .calc-btn:hover { background: #463E9E; }
+/* Admin */
+.admin-field{margin-bottom:1rem;}
+.admin-field label{display:block;font-size:12px;color:var(--txt2);margin-bottom:4px;}
+.admin-field input[type=number]{width:110px;font-size:14px;padding:7px 10px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:500px){.admin-grid{grid-template-columns:1fr;}}
+.admin-lock{text-align:center;padding:2rem 1rem;}
+.admin-lock input[type=password]{font-size:15px;padding:10px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);width:200px;text-align:center;display:block;margin:0 auto .75rem;}
 
-  .results { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-top: 0.875rem; }
-  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-  .metric-card { background: var(--color-background-primary); border-radius: var(--border-radius-md); padding: 0.875rem; text-align: center; }
-  .metric-card.full { grid-column: 1 / -1; }
-  .metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
-  .metric-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
-  .metric-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
-  .breakdown { font-size: 13px; }
-  .breakdown-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 0.5px solid var(--color-border-tertiary); gap: 8px; }
-  .breakdown-row > span:first-child { color: var(--color-text-secondary); }
-  .breakdown-row:last-child { border-bottom: none; font-weight: 500; }
-  .breakdown-row:last-child > span:first-child { color: var(--color-text-primary); }
-  .complexity-badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-  .c-low { background: #EAF3DE; color: #3B6D11; }
-  .c-med { background: #FAEEDA; color: #854F0B; }
-  .c-high { background: #FCEBEB; color: #A32D2D; }
-  .share-row { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
-  .share-btn {
-    flex: 1 1 100%; padding: 9px; font-size: 13px; border-radius: var(--border-radius-md); cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); color: var(--color-text-primary);
-    text-decoration: none;
-  }
-  .share-btn:hover { background: var(--color-background-secondary); }
-  @media (min-width: 420px) { .share-btn { flex: 1; } }
-  .hidden { display: none; }
-  .info-chip { display: inline-block; background: #EEEDFE; color: #3C3489; border-radius: 20px; padding: 2px 10px; font-size: 11px; }
-
-  .page-header { margin-bottom: 1rem; }
-  .page-header .title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
-  .page-header .subtitle { font-size: 13px; color: var(--color-text-secondary); }
-
-  .footer-note { text-align: center; font-size: 11px; color: var(--color-text-tertiary); margin-top: 1.5rem; padding-bottom: 1rem; line-height: 1.6; }
-
-  .history-item { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem; margin-bottom: 8px; background: var(--color-background-primary); }
-  .history-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-  .history-item-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
-  .history-item-date { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
-  .history-item-meta { font-size: 12px; color: var(--color-text-secondary); display: flex; flex-wrap: wrap; gap: 12px; }
-  .history-item-hours { font-size: 16px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; }
-  .history-del-btn { background: none; border: none; color: var(--color-text-tertiary); cursor: pointer; padding: 4px; font-size: 16px; line-height: 1; border-radius: var(--border-radius-md); }
-  .history-del-btn:hover { color: var(--color-text-danger); background: var(--color-background-secondary); }
+.chip-info{display:inline-block;background:var(--pur-l);color:var(--pur-d);border-radius:20px;padding:2px 9px;font-size:11px;}
+.hidden{display:none!important;}
+.foot{text-align:center;font-size:11px;color:var(--txt3);margin-top:1.5rem;padding-bottom:1rem;line-height:1.6;}
 </style>
 </head>
 <body>
 <div class="page">
 
-  <div class="page-header">
-    <div class="title">מחשבון תשומות מיפוי פוטוגרמטרי</div>
-    <div class="subtitle">הזן את פרמטרי הפרויקט לקבלת הערכת שעות עבודה</div>
+<div style="margin-bottom:1rem;">
+  <div style="font-size:19px;font-weight:500;margin-bottom:3px;">מחשבון תשומות מיפוי פוטוגרמטרי</div>
+  <div style="font-size:13px;color:var(--txt2);">כלי פנימי לאנשי מכירות — הערכת שעות עבודה</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('calc',this)"><i class="ti ti-calculator"></i> חישוב</button>
+  <button class="tab" onclick="showTab('hist',this)"><i class="ti ti-history"></i> היסטוריה</button>
+  <button class="tab" onclick="showTab('admin',this)"><i class="ti ti-settings"></i> מנהל</button>
+</div>
+
+<!-- ===================== CALC TAB ===================== -->
+<div id="tab-calc" class="tab-content active">
+
+<div id="undo-banner" class="undo-banner hidden">
+  <span><i class="ti ti-rotate-left"></i> החישוב נוקה. <span id="undo-timer">30</span> שניות לשחזור</span>
+  <button class="btn-sm" onclick="undoReset()">שחזר</button>
+</div>
+
+<!-- פרטי פרויקט -->
+<div class="section">
+  <div class="sec-title"><i class="ti ti-user"></i> פרטי פרויקט</div>
+  <div class="row">
+    <div class="field"><label>שם לקוח</label><input type="text" id="client-name" placeholder="שם הלקוח"/></div>
+    <div class="field"><label>חברה</label><input type="text" id="client-company" placeholder="שם החברה"/></div>
   </div>
+</div>
 
-  <div class="section">
-    <div class="section-title"><i class="ti ti-user" aria-hidden="true"></i> פרטי פרויקט</div>
-    <div class="row">
-      <div class="field"><label>שם לקוח</label><input type="text" id="client-name" placeholder="שם הלקוח" /></div>
-      <div class="field"><label>חברה</label><input type="text" id="client-company" placeholder="שם החברה" /></div>
+<!-- שטח -->
+<div class="section">
+  <div class="sec-title"><i class="ti ti-map"></i> שטח פרויקט</div>
+  <div class="row">
+    <div class="field">
+      <label>גודל שטח</label>
+      <input type="number" id="area-val" placeholder="הכנס ערך" min="0" step="0.1" oninput="updateArea()"/>
     </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title"><i class="ti ti-map" aria-hidden="true"></i> שטח פרויקט</div>
-    <div class="row">
-      <div class="field">
-        <label>גודל שטח</label>
-        <input type="number" id="area-val" placeholder="הכנס ערך" min="0" step="0.1" oninput="updateArea()" />
+    <div class="field">
+      <label>יחידה</label>
+      <div class="igroup" style="margin-top:4px;">
+        <span class="rbtn active" onclick="setUnit('sqkm',this)">קמ״ר</span>
+        <span class="rbtn" onclick="setUnit('dunam',this)">דונם</span>
       </div>
-      <div class="field">
-        <label>יחידה</label>
-        <div class="inline-group" style="margin-top:4px;">
-          <span class="radio-btn active" onclick="setUnit('sqkm',this)">קמ״ר</span>
-          <span class="radio-btn" onclick="setUnit('dunam',this)">דונם</span>
-        </div>
-      </div>
-    </div>
-    <div id="area-display" style="font-size:13px;color:var(--color-text-secondary);"></div>
-  </div>
-
-  <div class="section">
-    <div class="section-title" style="justify-content:space-between;">
-      <span><i class="ti ti-trees" aria-hidden="true"></i> אופי שטח</span>
-      <span class="info-chip">הזן אחוז מכל סוג — סה״כ 100%</span>
-    </div>
-
-    <div id="terrain-rows">
-      <div class="terrain-row" data-terrain="open">
-        <div class="terrain-top">
-          <span class="terrain-name">שטח פתוח / טבעי</span>
-          <input class="terrain-pct-input" type="number" min="0" max="100" step="1" placeholder="0%" oninput="updateTerrain()" />
-        </div>
-        <div class="terrain-computed" id="tc-open">—</div>
-      </div>
-      <div class="terrain-row" data-terrain="agri">
-        <div class="terrain-top">
-          <span class="terrain-name">אזור חקלאי / כפרי</span>
-          <input class="terrain-pct-input" type="number" min="0" max="100" step="1" placeholder="0%" oninput="updateTerrain()" />
-        </div>
-        <div class="terrain-computed" id="tc-agri">—</div>
-      </div>
-      <div class="terrain-row" data-terrain="mountain">
-        <div class="terrain-top">
-          <span class="terrain-name">אזור הררי</span>
-          <input class="terrain-pct-input" type="number" min="0" max="100" step="1" placeholder="0%" oninput="updateTerrain()" />
-        </div>
-        <div class="terrain-computed" id="tc-mountain">—</div>
-      </div>
-      <div class="terrain-row" data-terrain="urban-light">
-        <div class="terrain-top">
-          <span class="terrain-name">אזור אורבני מרווח</span>
-          <input class="terrain-pct-input" type="number" min="0" max="100" step="1" placeholder="0%" oninput="updateTerrain()" />
-        </div>
-        <div class="terrain-computed" id="tc-urban-light">—</div>
-      </div>
-      <div class="terrain-row" data-terrain="urban-dense">
-        <div class="terrain-top">
-          <span class="terrain-name">אזור אורבני צפוף</span>
-          <input class="terrain-pct-input" type="number" min="0" max="100" step="1" placeholder="0%" oninput="updateTerrain()" />
-        </div>
-        <div class="terrain-computed" id="tc-urban-dense">—</div>
-      </div>
-      <div class="terrain-row" data-terrain="industrial">
-        <div class="terrain-top">
-          <span class="terrain-name">אזור תעשייתי / מסחרי</span>
-          <input class="terrain-pct-input" type="number" min="0" max="100" step="1" placeholder="0%" oninput="updateTerrain()" />
-        </div>
-        <div class="terrain-computed" id="tc-industrial">—</div>
-      </div>
-    </div>
-
-    <div class="terrain-bar-wrap">
-      <div class="terrain-bar-fill" id="terrain-bar" style="width:0%;"></div>
-    </div>
-    <div class="sum-line" id="terrain-sum-line">
-      <span style="font-size:12px;color:var(--color-text-tertiary);">סה״כ:</span>
-      <span id="terrain-sum-pct" style="font-weight:500;color:var(--color-text-primary);">0%</span>
-      <span id="terrain-sum-status"></span>
     </div>
   </div>
+  <div id="area-display" style="font-size:13px;color:var(--txt2);"></div>
+  <div style="margin-top:8px;">
+    <a href="mapa-aoi.html" style="font-size:12px;color:var(--pur);text-decoration:none;"><i class="ti ti-map-2"></i> תיחום פוליגון AOI על מפה ←</a>
+  </div>
+</div>
 
-  <div class="section">
-    <div class="section-title"><i class="ti ti-ruler" aria-hidden="true"></i> קנ״מ ורשת קואורדינטות</div>
+<!-- אופי שטח -->
+<div class="section">
+  <div class="sec-title" style="justify-content:space-between;">
+    <span><i class="ti ti-trees"></i> אופי שטח</span>
+    <span class="chip-info">הזן אחוז — סה״כ 100%</span>
+  </div>
+  <div id="terrain-rows">
+    <div class="t-row" data-terrain="open"><div class="t-top"><span class="t-name">שטח פתוח / טבעי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="updateTerrain()"/></div><div class="t-computed" id="tc-open">—</div></div>
+    <div class="t-row" data-terrain="agri"><div class="t-top"><span class="t-name">אזור חקלאי / כפרי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="updateTerrain()"/></div><div class="t-computed" id="tc-agri">—</div></div>
+    <div class="t-row" data-terrain="mountain"><div class="t-top"><span class="t-name">אזור הררי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="updateTerrain()"/></div><div class="t-computed" id="tc-mountain">—</div></div>
+    <div class="t-row" data-terrain="urban-light"><div class="t-top"><span class="t-name">אזור אורבני מרווח</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="updateTerrain()"/></div><div class="t-computed" id="tc-urban-light">—</div></div>
+    <div class="t-row" data-terrain="urban-dense"><div class="t-top"><span class="t-name">אזור אורבני צפוף</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="updateTerrain()"/></div><div class="t-computed" id="tc-urban-dense">—</div></div>
+    <div class="t-row" data-terrain="industrial"><div class="t-top"><span class="t-name">אזור תעשייתי / מסחרי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="updateTerrain()"/></div><div class="t-computed" id="tc-industrial">—</div></div>
+  </div>
+  <div class="bar-wrap"><div class="bar-fill" id="terrain-bar" style="width:0%"></div></div>
+  <div class="sum-line"><span style="font-size:12px;color:var(--txt3);">סה״כ:</span><span id="terrain-sum-pct" style="font-weight:500;">0%</span><span id="terrain-sum-status"></span></div>
+</div>
+
+<!-- קנ"מ ורשת -->
+<div class="section">
+  <div class="sec-title"><i class="ti ti-ruler"></i> קנ״מ ורשת קואורדינטות</div>
+  <div class="row">
     <div class="field">
       <label>קנ״מ מיפוי</label>
       <select id="scale">
@@ -242,713 +204,876 @@
       </select>
     </div>
     <div class="field">
-      <label>רשת קואורדינטות (בחירה מרובה)</label>
-      <div class="checkbox-group">
-        <span class="chip" onclick="toggleChip(this,'grid')" data-val="israel">רשת ישראל חדשה</span>
-        <span class="chip" onclick="toggleChip(this,'grid')" data-val="utm">UTM</span>
-        <span class="chip" onclick="toggleChip(this,'grid')" data-val="internal">פנימית/תפעולית</span>
-        <span class="chip" onclick="toggleChip(this,'grid')" data-val="none">ללא רשת</span>
-        <span class="chip" onclick="toggleChip(this,'grid')" data-val="other">אחר</span>
-      </div>
-      <textarea class="other-text hidden" id="grid-other-text" placeholder="פרט רשת קואורדינטות אחרת..."></textarea>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title"><i class="ti ti-map-pin" aria-hidden="true"></i> נקודות בקרה (GCP)</div>
-    <div class="field">
-      <div class="inline-group">
-        <span class="radio-btn active" onclick="setGCP('none',this)">לא נדרש</span>
-        <span class="radio-btn" onclick="setGCP('client',this)">יסופק ע״י הלקוח</span>
-        <span class="radio-btn" onclick="setGCP('archive',this)">בדיקה בארכיון</span>
-        <span class="radio-btn" onclick="setGCP('required',this)">נדרש לבצע</span>
-      </div>
-    </div>
-    <div class="field hidden" id="gcp-count-field">
-      <label>מספר נקודות</label>
-      <input type="number" id="gcp-count" placeholder="כמות נקודות" min="0" style="width:120px;" />
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title"><i class="ti ti-puzzle" aria-hidden="true"></i> השלמות שטח</div>
-    <div class="row">
-      <div class="field">
-        <label>נדרשות השלמות שטח</label>
-        <div class="inline-group" style="margin-top:4px;">
-          <span class="radio-btn" onclick="setRadio('completion','yes',this)">כן</span>
-          <span class="radio-btn active" onclick="setRadio('completion','no',this)">לא</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>נדרש תיאום</label>
-        <div class="inline-group" style="margin-top:4px;">
-          <span class="radio-btn" onclick="setRadio('coordination','yes',this)">כן</span>
-          <span class="radio-btn active" onclick="setRadio('coordination','no',this)">לא</span>
-        </div>
+      <label>סוג מיפוי</label>
+      <div class="igroup" style="margin-top:4px;">
+        <span class="rbtn active" onclick="setRadio('mapType','new',this)">חדש</span>
+        <span class="rbtn" onclick="setRadio('mapType','update',this)">עדכון</span>
       </div>
     </div>
   </div>
-
-  <div class="section">
-    <div class="section-title"><i class="ti ti-file-description" aria-hidden="true"></i> דרישות מסירה ופורמטים</div>
-    <div class="field">
-      <label>מפרט הגשה (בחירה מרובה)</label>
-      <div class="checkbox-group">
-        <span class="chip" onclick="toggleChip(this,'spec')" data-val="mapi">מפ״י</span>
-        <span class="chip" onclick="toggleChip(this,'spec')" data-val="827">827</span>
-        <span class="chip" onclick="toggleChip(this,'spec')" data-val="risui">רישוי זמין</span>
-        <span class="chip" onclick="toggleChip(this,'spec')" data-val="bn">BN</span>
-        <span class="chip" onclick="toggleChip(this,'spec')" data-val="electric">חברת חשמל</span>
-        <span class="chip" onclick="toggleChip(this,'spec')" data-val="other">אחר</span>
-      </div>
-      <textarea class="other-text hidden" id="spec-other-text" placeholder="פרט מפרט הגשה אחר..."></textarea>
-    </div>
-    <div class="field">
-      <label>פורמט הגשה (בחירה מרובה)</label>
-      <div class="checkbox-group">
-        <span class="chip" onclick="toggleChip(this,'fmt')" data-val="dwg">DWG</span>
-        <span class="chip" onclick="toggleChip(this,'fmt')" data-val="dxf">DXF</span>
-        <span class="chip" onclick="toggleChip(this,'fmt')" data-val="pdf">PDF</span>
-        <span class="chip" onclick="toggleChip(this,'fmt')" data-val="shp">SHP</span>
-        <span class="chip" onclick="toggleChip(this,'fmt')" data-val="gdb">GDB</span>
-        <span class="chip" onclick="toggleChip(this,'fmt')" data-val="jpg">JPG</span>
-        <span class="chip" onclick="toggleChip(this,'fmt')" data-val="other">אחר</span>
-      </div>
-      <textarea class="other-text hidden" id="fmt-other-text" placeholder="פרט פורמט הגשה אחר..."></textarea>
+  <div class="field hidden" id="update-year-field">
+    <label>שנת מיפוי קודם</label>
+    <input type="number" id="update-year" placeholder="לדוגמה: 2018" min="1980" max="2030" style="width:140px;"/>
+  </div>
+  <div class="field">
+    <label>היקף מיפוי</label>
+    <div class="igroup">
+      <span class="rbtn active" onclick="setRadio('mapScope','full',this)">מלא</span>
+      <span class="rbtn" onclick="setRadio('mapScope','plani',this)">פלנימטריה בלבד</span>
     </div>
   </div>
-
-  <div class="section">
-    <div class="section-title"><i class="ti ti-layers" aria-hidden="true"></i> תוצרים נוספים</div>
-    <div class="row">
-      <div class="field">
-        <label>הדפסת מפות</label>
-        <div class="inline-group" style="margin-top:4px;">
-          <span class="radio-btn" onclick="setRadio('printing','yes',this)">כן</span>
-          <span class="radio-btn active" onclick="setRadio('printing','no',this)">לא</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>קווי גובה</label>
-        <div class="inline-group" style="margin-top:4px;">
-          <span class="radio-btn" onclick="setContours('yes',this)">כן</span>
-          <span class="radio-btn active" onclick="setContours('no',this)">לא</span>
-        </div>
-      </div>
+  <div class="field">
+    <label>רשת קואורדינטות (בחירה מרובה)</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this,'grid')" data-val="israel">רשת ישראל חדשה</span>
+      <span class="chip" onclick="toggleChip(this,'grid')" data-val="utm">UTM</span>
+      <span class="chip" onclick="toggleChip(this,'grid')" data-val="internal">פנימית/תפעולית</span>
+      <span class="chip" onclick="toggleChip(this,'grid')" data-val="none">ללא רשת</span>
+      <span class="chip" onclick="toggleChip(this,'grid')" data-val="other">אחר</span>
     </div>
-    <div class="field">
-      <label>גושים וחלקות</label>
-      <div class="inline-group" style="margin-top:4px;">
-        <span class="radio-btn" onclick="setParcels('yes',this)">כן</span>
-        <span class="radio-btn active" onclick="setParcels('no',this)">לא</span>
-      </div>
-    </div>
-    <div class="row hidden" id="parcels-fields">
-      <div class="field">
-        <label>מקור גושים וחלקות</label>
-        <div class="inline-group" style="margin-top:4px;">
-          <span class="radio-btn" onclick="setRadio('parcelSource','existing',this)">שכבה קיימת</span>
-          <span class="radio-btn" onclick="setRadio('parcelSource','external',this)">קליטה חיצונית</span>
-          <span class="radio-btn" onclick="setRadio('parcelSource','unknown',this)">לא ידוע</span>
-          <span class="radio-btn" onclick="setRadio('parcelSource','other',this)">אחר</span>
-        </div>
-        <textarea class="other-text hidden" id="parcelSource-other-text" placeholder="פרט מקור גושים וחלקות..."></textarea>
-      </div>
-    </div>
-    <div class="row hidden" id="contour-fields">
-      <div class="field">
-        <label>אינטרוול קווי גובה (מ׳)</label>
-        <input type="number" id="contour-interval" placeholder="לדוגמה: 0.5" min="0" step="0.1" />
-      </div>
-      <div class="field">
-        <label>רזולוציה GSD (ס״מ/פיקסל)</label>
-        <input type="number" id="gsd" placeholder="לדוגמה: 5" min="0" step="0.5" />
-      </div>
-    </div>
-    <div class="field">
-      <label>DTM — צפיפות שריג</label>
-      <div class="inline-group" style="margin-top:4px;">
-        <span class="radio-btn active" onclick="setDtm('none',this)">ללא DTM</span>
-        <span class="radio-btn" onclick="setDtm('40x40',this)">40×40</span>
-        <span class="radio-btn" onclick="setDtm('20x20',this)">20×20</span>
-        <span class="radio-btn" onclick="setDtm('15x15',this)">15×15</span>
-        <span class="radio-btn" onclick="setDtm('10x10',this)">10×10</span>
-        <span class="radio-btn" onclick="setDtm('other',this)">אחר</span>
-      </div>
-      <textarea class="other-text hidden" id="dtm-other-text" placeholder="פרט צפיפות שריג אחרת..."></textarea>
-    </div>
+    <textarea class="hidden" id="grid-other-text" placeholder="פרט רשת אחרת..." style="margin-top:7px;"></textarea>
   </div>
-
-  <button class="calc-btn" onclick="calculate()">
-    <i class="ti ti-calculator" aria-hidden="true"></i> חשב תשומות
-  </button>
-
-  <div style="text-align:center; margin-top:8px;">
-    <a href="mapa-aoi.html" style="font-size:13px; color:#534AB7; text-decoration:none;">
-      <i class="ti ti-map-2" aria-hidden="true"></i> תיחום פוליגון AOI על מפה ←
-    </a>
-  </div>
-
-
-  <div class="results hidden" id="results-panel">
-    <div style="font-size:14px;font-weight:500;margin-bottom:0.875rem;">
-      <i class="ti ti-chart-bar" aria-hidden="true"></i> תוצאות הערכת תשומות
-      <div id="result-client" style="font-size:13px;color:var(--color-text-secondary);font-weight:400;margin-top:4px;"></div>
-    </div>
-    <div class="metrics">
-      <div class="metric-card">
-        <div class="metric-label">שעות עבודה משוערות</div>
-        <div class="metric-val" id="res-hours">—</div>
-        <div class="metric-sub">שעות</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">ימי עבודה</div>
-        <div class="metric-val" id="res-days">—</div>
-        <div class="metric-sub">בסיס 8 שע׳/יום</div>
-      </div>
-      <div class="metric-card full">
-        <div class="metric-label">רמת מורכבות</div>
-        <div id="res-complexity">—</div>
-      </div>
-    </div>
-    <div class="breakdown">
-      <div style="font-size:13px;font-weight:500;margin-bottom:8px;">פירוט מקדמים</div>
-      <div class="breakdown-row"><span>שטח בסיס (קמ״ר)</span><span id="bd-area">—</span></div>
-      <div class="breakdown-row"><span>מקדם אופי שטח</span><span id="bd-terrain">—</span></div>
-      <div class="breakdown-row"><span>מקדם קנ״מ</span><span id="bd-scale">—</span></div>
-      <div class="breakdown-row"><span>תוספת GCP</span><span id="bd-gcp">—</span></div>
-      <div class="breakdown-row"><span>תוספת תוצרים</span><span id="bd-products">—</span></div>
-      <div class="breakdown-row"><span>תוספת פורמטים מרובים</span><span id="bd-formats">—</span></div>
-      <div class="breakdown-row"><span>תוספת דרישות הגשה</span><span id="bd-spec">—</span></div>
-      <div class="breakdown-row"><span>סה״כ שעות</span><span id="bd-total">—</span></div>
-    </div>
-    <div class="share-row">
-      <a class="share-btn" id="whatsapp-btn" href="#" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> וואטסאפ</a>
-      <a class="share-btn" id="email-btn" href="#"><i class="ti ti-mail" aria-hidden="true"></i> מייל</a>
-      <button class="share-btn" onclick="copySummary()" id="copy-btn"><i class="ti ti-copy" aria-hidden="true"></i> העתק סיכום</button>
-    </div>
-    <button class="calc-btn" style="margin-top:0.75rem; background: var(--color-background-primary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-secondary);" onclick="newCalculation()">
-      <i class="ti ti-plus" aria-hidden="true"></i> חישוב חדש
-    </button>
-  </div>
-
-  <div class="section" id="history-section">
-    <div class="section-title" style="justify-content:space-between;">
-      <span><i class="ti ti-history" aria-hidden="true"></i> היסטוריית חישובים</span>
-      <span class="info-chip" id="history-count">0 רשומות</span>
-    </div>
-
-    <div id="history-empty" style="font-size:13px; color: var(--color-text-tertiary); text-align:center; padding: 1rem 0;">
-      עדיין לא נשמרו חישובים. כל חישוב שמתבצע נשמר אוטומטית בדפדפן שלך.
-    </div>
-
-    <div id="history-stats" class="hidden">
-      <div class="metrics" style="margin-bottom: 0.75rem;">
-        <div class="metric-card">
-          <div class="metric-label">סה״כ שטח שחושב</div>
-          <div class="metric-val" id="stat-total-area">—</div>
-          <div class="metric-sub">קמ״ר</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">ממוצע שעות / קמ״ר</div>
-          <div class="metric-val" id="stat-avg-rate">—</div>
-          <div class="metric-sub">שעות לקמ״ר</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">סה״כ שעות מצטבר</div>
-          <div class="metric-val" id="stat-total-hours">—</div>
-          <div class="metric-sub">שעות</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">קנ״מ נפוץ</div>
-          <div class="metric-val" id="stat-common-scale">—</div>
-          <div class="metric-sub" id="stat-common-scale-sub"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="history-list"></div>
-
-    <div class="share-row hidden" id="history-actions">
-      <button class="share-btn" onclick="exportHistoryCSV()"><i class="ti ti-download" aria-hidden="true"></i> ייצוא ל-CSV</button>
-      <button class="share-btn" onclick="clearHistory()"><i class="ti ti-trash" aria-hidden="true"></i> נקה היסטוריה</button>
-    </div>
-  </div>
-
-  <div class="footer-note">מחשבון תשומות פנימי — מיועד לאנשי מכירות. הערכה בלבד, אינה מהווה הצעת מחיר.<br>היסטוריית החישובים נשמרת באופן מקומי בדפדפן זה בלבד.</div>
-
 </div>
 
+<!-- GCP -->
+<div class="section">
+  <div class="sec-title"><i class="ti ti-map-pin"></i> נקודות בקרה (GCP)</div>
+  <div class="field">
+    <div class="igroup">
+      <span class="rbtn active" onclick="setGCP('none',this)">לא נדרש</span>
+      <span class="rbtn" onclick="setGCP('client',this)">יסופק ע״י הלקוח</span>
+      <span class="rbtn" onclick="setGCP('archive',this)">בדיקה בארכיון</span>
+      <span class="rbtn" onclick="setGCP('required',this)">נדרש לבצע</span>
+    </div>
+  </div>
+  <div class="row hidden" id="gcp-fields">
+    <div class="field"><label>מספר נקודות</label><input type="number" id="gcp-count" placeholder="כמות" min="0" style="width:100px;"/></div>
+    <div class="field"><label>סוג נקודות</label>
+      <div class="igroup" style="margin-top:4px;">
+        <span class="rbtn active" onclick="setRadio('gcpType','regular',this)">רגילות</span>
+        <span class="rbtn" onclick="setRadio('gcpType','mapi',this)">מאושרות מפ״י</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- השלמות + AI -->
+<div class="section">
+  <div class="sec-title"><i class="ti ti-puzzle"></i> תנאי עבודה</div>
+  <div class="row">
+    <div class="field"><label>השלמות שטח</label>
+      <div class="igroup" style="margin-top:4px;">
+        <span class="rbtn" onclick="setRadio('completion','yes',this)">כן</span>
+        <span class="rbtn active" onclick="setRadio('completion','no',this)">לא</span>
+      </div>
+    </div>
+    <div class="field"><label>נדרש תיאום</label>
+      <div class="igroup" style="margin-top:4px;">
+        <span class="rbtn" onclick="setRadio('coordination','yes',this)">כן</span>
+        <span class="rbtn active" onclick="setRadio('coordination','no',this)">לא</span>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label>תיקוף מודד בשטח</label>
+    <div class="igroup">
+      <span class="rbtn" onclick="setRadio('fieldCheck','yes',this)">כן</span>
+      <span class="rbtn active" onclick="setRadio('fieldCheck','no',this)">לא</span>
+    </div>
+  </div>
+  <div class="field">
+    <label><i class="ti ti-robot" style="color:var(--pur);"></i> שימוש בכלי AI בתהליך</label>
+    <div class="igroup" style="margin-top:4px;">
+      <span class="rbtn" onclick="setRadio('aiUsed','yes',this)">כן — מפחית תשומות</span>
+      <span class="rbtn active" onclick="setRadio('aiUsed','no',this)">לא</span>
+    </div>
+    <div style="font-size:11px;color:var(--txt3);margin-top:4px;" id="ai-discount-note"></div>
+  </div>
+</div>
+
+<!-- דרישות מסירה -->
+<div class="section">
+  <div class="sec-title"><i class="ti ti-file-description"></i> דרישות מסירה ופורמטים</div>
+  <div class="field">
+    <label>מפרט הגשה (בחירה מרובה)</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this,'spec')" data-val="mapi">מפ״י</span>
+      <span class="chip" onclick="toggleChip(this,'spec')" data-val="827">827</span>
+      <span class="chip" onclick="toggleChip(this,'spec')" data-val="risui">רישוי זמין</span>
+      <span class="chip" onclick="toggleChip(this,'spec')" data-val="bn">BN</span>
+      <span class="chip" onclick="toggleChip(this,'spec')" data-val="electric">חברת חשמל</span>
+      <span class="chip" onclick="toggleChip(this,'spec')" data-val="mabat">מבא״ת</span>
+      <span class="chip" onclick="toggleChip(this,'spec')" data-val="other">אחר</span>
+    </div>
+    <textarea class="hidden" id="spec-other-text" placeholder="פרט מפרט אחר..." style="margin-top:7px;"></textarea>
+  </div>
+  <div class="field">
+    <label>פורמט הגשה (בחירה מרובה)</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this,'fmt')" data-val="dwg">DWG</span>
+      <span class="chip" onclick="toggleChip(this,'fmt')" data-val="dxf">DXF</span>
+      <span class="chip" onclick="toggleChip(this,'fmt')" data-val="pdf">PDF</span>
+      <span class="chip" onclick="toggleChip(this,'fmt')" data-val="shp">SHP</span>
+      <span class="chip" onclick="toggleChip(this,'fmt')" data-val="gdb">GDB</span>
+      <span class="chip" onclick="toggleChip(this,'fmt')" data-val="jpg">JPG</span>
+      <span class="chip" onclick="toggleChip(this,'fmt')" data-val="other">אחר</span>
+    </div>
+    <textarea class="hidden" id="fmt-other-text" placeholder="פרט פורמט אחר..." style="margin-top:7px;"></textarea>
+  </div>
+</div>
+
+<!-- תוצרים נוספים -->
+<div class="section">
+  <div class="sec-title"><i class="ti ti-layers"></i> תוצרים נוספים</div>
+  <div class="row">
+    <div class="field"><label>הדפסת מפות</label>
+      <div class="igroup" style="margin-top:4px;">
+        <span class="rbtn" onclick="setRadio('printing','yes',this)">כן</span>
+        <span class="rbtn active" onclick="setRadio('printing','no',this)">לא</span>
+      </div>
+    </div>
+    <div class="field"><label>קווי גובה</label>
+      <div class="igroup" style="margin-top:4px;">
+        <span class="rbtn" onclick="setContours('yes',this)">כן</span>
+        <span class="rbtn active" onclick="setContours('no',this)">לא</span>
+      </div>
+    </div>
+  </div>
+  <div class="row hidden" id="contour-fields">
+    <div class="field"><label>אינטרוול קווי גובה (מ׳)</label><input type="number" id="contour-interval" placeholder="0.5" min="0" step="0.1"/></div>
+    <div class="field"><label>רזולוציה GSD (ס״מ/פיקסל)</label><input type="number" id="gsd" placeholder="5" min="0" step="0.5"/></div>
+  </div>
+  <div class="field"><label>גושים וחלקות</label>
+    <div class="igroup">
+      <span class="rbtn" onclick="setParcels('yes',this)">כן</span>
+      <span class="rbtn active" onclick="setParcels('no',this)">לא</span>
+    </div>
+  </div>
+  <div class="field hidden" id="parcel-src-field"><label>מקור גושים וחלקות</label>
+    <div class="igroup" style="margin-top:4px;">
+      <span class="rbtn" onclick="setRadio('parcelSource','existing',this)">שכבה קיימת</span>
+      <span class="rbtn" onclick="setRadio('parcelSource','external',this)">קליטה חיצונית</span>
+      <span class="rbtn" onclick="setRadio('parcelSource','unknown',this)">לא ידוע</span>
+      <span class="rbtn" onclick="setRadio('parcelSource','other',this)">אחר</span>
+    </div>
+    <textarea class="hidden" id="parcelSource-other-text" style="margin-top:7px;" placeholder="פרט..."></textarea>
+  </div>
+  <div class="field"><label>DTM — צפיפות שריג</label>
+    <div class="igroup">
+      <span class="rbtn active" onclick="setDtm('none',this)">ללא</span>
+      <span class="rbtn" onclick="setDtm('40x40',this)">40×40</span>
+      <span class="rbtn" onclick="setDtm('20x20',this)">20×20</span>
+      <span class="rbtn" onclick="setDtm('15x15',this)">15×15</span>
+      <span class="rbtn" onclick="setDtm('10x10',this)">10×10</span>
+      <span class="rbtn" onclick="setDtm('other',this)">אחר</span>
+    </div>
+    <textarea class="hidden" id="dtm-other-text" style="margin-top:7px;" placeholder="פרט..."></textarea>
+  </div>
+</div>
+
+<button class="btn-primary" onclick="calculate()"><i class="ti ti-calculator"></i> חשב תשומות</button>
+
+<!-- תוצאות -->
+<div class="results hidden" id="results-panel">
+  <div style="font-size:14px;font-weight:500;margin-bottom:.875rem;">
+    <i class="ti ti-chart-bar"></i> תוצאות הערכת תשומות
+    <div id="result-client" style="font-size:13px;color:var(--txt2);font-weight:400;margin-top:3px;"></div>
+  </div>
+  <div id="ai-badge" class="hidden" style="background:var(--pur-l);color:var(--pur-d);border-radius:var(--rmd);padding:6px 10px;font-size:12px;margin-bottom:10px;"><i class="ti ti-robot"></i> כולל הנחת AI — <span id="ai-pct-show"></span>% הפחתה</div>
+  <div class="metrics">
+    <div class="metric-card"><div class="metric-label">שעות עבודה</div><div class="metric-val" id="res-hours">—</div><div class="metric-sub">שעות</div></div>
+    <div class="metric-card"><div class="metric-label">ימי עבודה</div><div class="metric-val" id="res-days">—</div><div class="metric-sub">בסיס 8 שע׳/יום</div></div>
+    <div class="metric-card full"><div class="metric-label">רמת מורכבות</div><div id="res-complexity">—</div></div>
+  </div>
+  <div style="font-size:13px;font-weight:500;margin-bottom:8px;">פירוט מקדמים</div>
+  <div class="bdrow"><span>שטח (קמ״ר)</span><span id="bd-area">—</span></div>
+  <div class="bdrow"><span>מקדם אופי שטח</span><span id="bd-terrain">—</span></div>
+  <div class="bdrow"><span>מקדם קנ״מ</span><span id="bd-scale">—</span></div>
+  <div class="bdrow"><span>מקדם היקף מיפוי</span><span id="bd-scope">—</span></div>
+  <div class="bdrow"><span>תוספת GCP</span><span id="bd-gcp">—</span></div>
+  <div class="bdrow"><span>תוספת תוצרים</span><span id="bd-products">—</span></div>
+  <div class="bdrow"><span>תוספת פורמטים</span><span id="bd-formats">—</span></div>
+  <div class="bdrow"><span>תוספת מפרטים</span><span id="bd-spec">—</span></div>
+  <div class="bdrow"><span>הנחת AI</span><span id="bd-ai">—</span></div>
+  <div class="bdrow"><span>סה״כ שעות</span><span id="bd-total">—</span></div>
+  <div class="share-row">
+    <a class="btn-sec" id="wa-btn" href="#" target="_blank"><i class="ti ti-brand-whatsapp"></i> וואטסאפ</a>
+    <a class="btn-sec" id="mail-btn" href="#"><i class="ti ti-mail"></i> מייל</a>
+    <button class="btn-sec" onclick="copyResult()" id="copy-btn"><i class="ti ti-copy"></i> העתק</button>
+  </div>
+  <button class="btn-sec btn-danger" style="margin-top:8px;width:100%;" onclick="newCalcWithUndo()"><i class="ti ti-plus"></i> חישוב חדש</button>
+</div>
+
+</div><!-- end tab-calc -->
+
+<!-- ===================== HISTORY TAB ===================== -->
+<div id="tab-hist" class="tab-content">
+
+<div class="section">
+  <div class="sec-title" style="justify-content:space-between;">
+    <span><i class="ti ti-history"></i> היסטוריית חישובים</span>
+    <span class="chip-info" id="hist-count">0 רשומות</span>
+  </div>
+
+  <!-- סטטיסטיקות -->
+  <div id="hist-stats" class="hidden" style="margin-bottom:1rem;">
+    <div class="metrics">
+      <div class="metric-card"><div class="metric-label">סה״כ שטח</div><div class="metric-val" id="st-area">—</div><div class="metric-sub">קמ״ר</div></div>
+      <div class="metric-card"><div class="metric-label">ממוצע שע׳/קמ״ר</div><div class="metric-val" id="st-rate">—</div><div class="metric-sub">שעות</div></div>
+      <div class="metric-card"><div class="metric-label">קנ״מ נפוץ</div><div class="metric-val" id="st-scale">—</div><div class="metric-sub" id="st-scale-sub"></div></div>
+      <div class="metric-card"><div class="metric-label">אופי שטח שכיח</div><div class="metric-val" id="st-terrain">—</div><div class="metric-sub" id="st-terrain-sub"></div></div>
+    </div>
+  </div>
+
+  <!-- סינון -->
+  <div id="hist-filters" class="hidden" style="margin-bottom:.75rem;">
+    <div class="row">
+      <div class="field"><label>סינון לפי קנ״מ</label>
+        <select id="filter-scale" onchange="renderHistory()">
+          <option value="">הכל</option>
+          <option value="250">1:250</option><option value="500">1:500</option>
+          <option value="1000">1:1,000</option><option value="2500">1:2,500</option>
+          <option value="5000">1:5,000</option><option value="10000">1:10,000</option>
+        </select>
+      </div>
+      <div class="field"><label>סינון לפי מורכבות</label>
+        <select id="filter-complexity" onchange="renderHistory()">
+          <option value="">הכל</option>
+          <option value="נמוכה">נמוכה</option>
+          <option value="בינונית">בינונית</option>
+          <option value="גבוהה">גבוהה</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="hist-empty" style="font-size:13px;color:var(--txt3);text-align:center;padding:1.5rem 0;">עדיין לא בוצעו חישובים. כל חישוב נשמר אוטומטית.</div>
+  <div id="hist-table-wrap" class="hidden" style="overflow-x:auto;">
+    <table class="hist-table" id="hist-table">
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          <th>לקוח / חברה</th>
+          <th>שטח קמ״ר</th>
+          <th>קנ״מ</th>
+          <th>אופי שטח</th>
+          <th>שעות</th>
+          <th>מורכבות</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="hist-tbody"></tbody>
+    </table>
+  </div>
+  <div class="share-row hidden" id="hist-actions" style="margin-top:.875rem;">
+    <button class="btn-sec" onclick="exportCSV()"><i class="ti ti-download"></i> ייצוא CSV</button>
+    <button class="btn-sec btn-danger" onclick="clearAllHistory()"><i class="ti ti-trash"></i> נקה הכל</button>
+  </div>
+</div>
+
+</div><!-- end tab-hist -->
+
+<!-- ===================== ADMIN TAB ===================== -->
+<div id="tab-admin" class="tab-content">
+
+<div class="section">
+  <div class="sec-title"><i class="ti ti-lock"></i> כניסת מנהל מערכת</div>
+  <div id="admin-lock">
+    <div class="admin-lock">
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:1rem;">הזן סיסמת מנהל לגישה לפרמטרי החישוב</div>
+      <input type="password" id="admin-pwd" placeholder="סיסמה" onkeydown="if(event.key==='Enter')adminLogin()"/>
+      <button class="btn-primary" style="width:200px;margin:0 auto;" onclick="adminLogin()">כניסה</button>
+      <div id="admin-err" style="font-size:12px;color:var(--red-t);margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <div id="admin-panel" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div style="font-size:13px;color:var(--grn-t);"><i class="ti ti-check"></i> מחובר כמנהל</div>
+      <button class="btn-sm" onclick="adminLogout()">התנתק</button>
+    </div>
+
+    <!-- סיסמה -->
+    <div class="section" style="margin-bottom:.875rem;">
+      <div class="sec-title"><i class="ti ti-key"></i> שינוי סיסמה</div>
+      <div class="row">
+        <div class="field"><label>סיסמה חדשה</label><input type="password" id="new-pwd1" placeholder="סיסמה חדשה"/></div>
+        <div class="field"><label>אימות</label><input type="password" id="new-pwd2" placeholder="חזור על הסיסמה"/></div>
+      </div>
+      <button class="btn-sec" onclick="changePwd()"><i class="ti ti-check"></i> שמור סיסמה</button>
+      <div id="pwd-msg" style="font-size:12px;margin-top:6px;"></div>
+    </div>
+
+    <!-- מקדמי בסיס -->
+    <div class="section" style="margin-bottom:.875rem;">
+      <div class="sec-title"><i class="ti ti-sliders"></i> שעות בסיס לקמ״ר</div>
+      <div class="admin-grid">
+        <div class="admin-field"><label>שעות בסיס לקמ״ר</label><input type="number" id="p-base" min="1" step="0.5"/></div>
+        <div class="admin-field"><label>הנחת AI (%)</label><input type="number" id="p-ai-disc" min="0" max="50" step="1"/></div>
+        <div class="admin-field"><label>תוספת מפרט מבא״ת (%)</label><input type="number" id="p-mabat" min="0" max="100" step="1"/></div>
+        <div class="admin-field"><label>תוספת לקנ״מ נוסף (שע׳)</label><input type="number" id="p-extra-scale" min="0" step="0.5"/></div>
+      </div>
+    </div>
+
+    <!-- מקדמי אופי שטח -->
+    <div class="section" style="margin-bottom:.875rem;">
+      <div class="sec-title"><i class="ti ti-trees"></i> מקדמי אופי שטח</div>
+      <div class="admin-grid">
+        <div class="admin-field"><label>שטח פתוח / טבעי</label><input type="number" id="tf-open" min="0.5" max="5" step="0.05"/></div>
+        <div class="admin-field"><label>חקלאי / כפרי</label><input type="number" id="tf-agri" min="0.5" max="5" step="0.05"/></div>
+        <div class="admin-field"><label>הררי</label><input type="number" id="tf-mountain" min="0.5" max="5" step="0.05"/></div>
+        <div class="admin-field"><label>אורבני מרווח</label><input type="number" id="tf-urban-light" min="0.5" max="5" step="0.05"/></div>
+        <div class="admin-field"><label>אורבני צפוף</label><input type="number" id="tf-urban-dense" min="0.5" max="5" step="0.05"/></div>
+        <div class="admin-field"><label>תעשייתי / מסחרי</label><input type="number" id="tf-industrial" min="0.5" max="5" step="0.05"/></div>
+      </div>
+    </div>
+
+    <!-- מקדמי קנ"מ -->
+    <div class="section" style="margin-bottom:.875rem;">
+      <div class="sec-title"><i class="ti ti-ruler"></i> מקדמי קנ״מ</div>
+      <div class="admin-grid">
+        <div class="admin-field"><label>1:250</label><input type="number" id="sf-250" min="0.1" max="10" step="0.05"/></div>
+        <div class="admin-field"><label>1:500</label><input type="number" id="sf-500" min="0.1" max="10" step="0.05"/></div>
+        <div class="admin-field"><label>1:1,000</label><input type="number" id="sf-1000" min="0.1" max="10" step="0.05"/></div>
+        <div class="admin-field"><label>1:2,500</label><input type="number" id="sf-2500" min="0.1" max="10" step="0.05"/></div>
+        <div class="admin-field"><label>1:5,000</label><input type="number" id="sf-5000" min="0.1" max="10" step="0.05"/></div>
+        <div class="admin-field"><label>1:10,000</label><input type="number" id="sf-10000" min="0.1" max="10" step="0.05"/></div>
+      </div>
+    </div>
+
+    <!-- תוספות -->
+    <div class="section" style="margin-bottom:.875rem;">
+      <div class="sec-title"><i class="ti ti-plus"></i> תוספות שעות</div>
+      <div class="admin-grid">
+        <div class="admin-field"><label>GCP בארכיון (שע׳)</label><input type="number" id="p-gcp-archive" min="0" step="0.5"/></div>
+        <div class="admin-field"><label>GCP לביצוע (שע׳/נקודה)</label><input type="number" id="p-gcp-per" min="0" step="0.1"/></div>
+        <div class="admin-field"><label>קווי גובה (שע׳/קמ״ר)</label><input type="number" id="p-contours" min="0" step="0.1"/></div>
+        <div class="admin-field"><label>גושים וחלקות (שע׳/קמ״ר)</label><input type="number" id="p-parcels" min="0" step="0.1"/></div>
+        <div class="admin-field"><label>הדפסה (שע׳)</label><input type="number" id="p-print" min="0" step="0.5"/></div>
+        <div class="admin-field"><label>השלמות שטח (שע׳/קמ״ר)</label><input type="number" id="p-completion" min="0" step="0.1"/></div>
+        <div class="admin-field"><label>תיאום (שע׳)</label><input type="number" id="p-coord" min="0" step="0.5"/></div>
+        <div class="admin-field"><label>תיקוף שטח (שע׳)</label><input type="number" id="p-field" min="0" step="0.5"/></div>
+        <div class="admin-field"><label>פלנימטריה בלבד (מקדם)</label><input type="number" id="p-plani" min="0.1" max="1" step="0.05"/></div>
+        <div class="admin-field"><label>מקדם עדכון (מול חדש)</label><input type="number" id="p-update" min="0.1" max="1" step="0.05"/></div>
+        <div class="admin-field"><label>מפרט נוסף (שע׳)</label><input type="number" id="p-spec" min="0" step="0.5"/></div>
+        <div class="admin-field"><label>פורמט נוסף (שע׳)</label><input type="number" id="p-fmt" min="0" step="0.5"/></div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="saveParams()"><i class="ti ti-device-floppy"></i> שמור את כל הפרמטרים</button>
+    <div id="save-msg" style="font-size:13px;text-align:center;margin-top:8px;"></div>
+    <button class="btn-sec" style="margin-top:8px;" onclick="resetParams()"><i class="ti ti-refresh"></i> איפוס לברירת מחדל</button>
+  </div>
+</div>
+
+</div><!-- end tab-admin -->
+
+<div class="foot">מחשבון תשומות פנימי — מיועד לאנשי מכירות בלבד. הערכה בלבד, אינה מהווה הצעת מחיר.<br>היסטוריה נשמרת מקומית בדפדפן זה.</div>
+</div><!-- end page -->
+
 <script>
+// =================== DEFAULTS ===================
+const DEFAULT_PARAMS = {
+  base: 12, aiDisc: 20, mabat: 15, extraScale: 4,
+  tf: { open:1.0, agri:1.1, mountain:1.4, 'urban-light':1.3, 'urban-dense':1.6, industrial:1.25 },
+  sf: { '250':2.2, '500':1.8, '1000':1.4, '2500':1.1, '5000':0.85, '10000':0.7 },
+  gcpArchive:4, gcpPer:2.5, contours:3, parcels:2, print:4,
+  completion:1.5, coord:6, field:4, plani:0.7, update:0.6, spec:3, fmt:2
+};
+const ADMIN_PWD_KEY = 'mipui_admin_pwd';
+const PARAMS_KEY = 'mipui_params_v1';
+const HIST_KEY = 'mipui_hist_v2';
+const HIST_LIMIT = 300;
+const SCALE_LABELS = {'250':'1:250','500':'1:500','1000':'1:1,000','2500':'1:2,500','5000':'1:5,000','10000':'1:10,000'};
+const TERRAIN_LABELS = {open:'פתוח/טבעי',agri:'חקלאי',mountain:'הררי','urban-light':'אורבני מרווח','urban-dense':'אורבני צפוף',industrial:'תעשייתי'};
+const COMPLEXITY_MAP = {'נמוכה':'c-low','בינונית':'c-med','גבוהה':'c-high'};
+
+function loadParams() {
+  try { const r = localStorage.getItem(PARAMS_KEY); if(r) return JSON.parse(r); } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_PARAMS));
+}
+function saveParamsObj(p) { localStorage.setItem(PARAMS_KEY, JSON.stringify(p)); }
+function getAdminPwd() { return localStorage.getItem(ADMIN_PWD_KEY) || 'admin123'; }
+
+// =================== STATE ===================
 const state = {
-  unit: 'sqkm', gcp: 'none', completion: 'no', coordination: 'no',
-  printing: 'no', contours: 'no', parcels: 'no', parcelSource: '', dtm: 'none',
-  grids: [], specs: [], formats: []
+  unit:'sqkm', gcp:'none', mapType:'new', mapScope:'full', gcpType:'regular',
+  completion:'no', coordination:'no', fieldCheck:'no', aiUsed:'no',
+  printing:'no', contours:'no', parcels:'no', parcelSource:'', dtm:'none',
+  grids:[], specs:[], formats:[]
 };
 
-const terrainFactors = { open:1.0, agri:1.1, mountain:1.4, 'urban-light':1.3, 'urban-dense':1.6, industrial:1.25 };
-const scaleFactors = { '250':2.2,'500':1.8,'1000':1.4,'2500':1.1,'5000':0.85,'10000':0.7 };
+let undoData = null, undoInterval = null;
 
-function setUnit(u, el) {
-  state.unit = u;
-  document.querySelectorAll('[onclick^="setUnit"]').forEach(e => e.classList.remove('active'));
+// =================== TABS ===================
+function showTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  updateArea();
-  updateTerrain();
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='hist') renderHistory();
+  if(name==='admin') loadAdminPanel();
 }
 
-function updateArea() {
-  const val = parseFloat(document.getElementById('area-val').value);
-  const disp = document.getElementById('area-display');
-  if (!isNaN(val) && val > 0) {
-    if (state.unit === 'dunam') {
-      disp.textContent = 'שווה ל: ' + (val / 1000).toFixed(3) + ' קמ״ר';
-    } else {
-      disp.textContent = 'שווה ל: ' + Math.round(val * 1000) + ' דונם';
-    }
-  } else {
-    disp.textContent = '';
-  }
-  updateTerrain();
+// =================== UNIT ===================
+function setUnit(u,el) {
+  state.unit=u;
+  document.querySelectorAll('[onclick^="setUnit"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  updateArea(); updateTerrain();
 }
-
 function getAreaSqkm() {
-  const val = parseFloat(document.getElementById('area-val').value) || 0;
-  return state.unit === 'dunam' ? val / 1000 : val;
+  const v=parseFloat(document.getElementById('area-val').value)||0;
+  return state.unit==='dunam'?v/1000:v;
+}
+function updateArea() {
+  const v=parseFloat(document.getElementById('area-val').value);
+  const d=document.getElementById('area-display');
+  if(!isNaN(v)&&v>0) d.textContent=state.unit==='dunam'?'= '+(v/1000).toFixed(3)+' קמ״ר':'= '+Math.round(v*1000)+' דונם';
+  else d.textContent='';
+  updateTerrain();
 }
 
+// =================== TERRAIN ===================
 function updateTerrain() {
-  const areaSqkm = getAreaSqkm();
-  const rows = document.querySelectorAll('#terrain-rows .terrain-row');
-  let totalPct = 0;
-
-  rows.forEach(row => {
-    const key = row.dataset.terrain;
-    const pct = parseFloat(row.querySelector('input').value) || 0;
-    totalPct += pct;
-    const out = document.getElementById('tc-' + key);
-    if (areaSqkm > 0 && pct > 0) {
-      const sqkm = (pct / 100) * areaSqkm;
-      const dun = sqkm * 1000;
-      out.textContent = sqkm.toFixed(3) + ' קמ״ר  •  ' + Math.round(dun) + ' דונם';
-    } else {
-      out.textContent = '—';
-    }
+  const sqkm=getAreaSqkm();
+  let tot=0;
+  document.querySelectorAll('#terrain-rows .t-row').forEach(row=>{
+    const k=row.dataset.terrain, pct=parseFloat(row.querySelector('input').value)||0;
+    tot+=pct;
+    const el=document.getElementById('tc-'+k);
+    if(sqkm>0&&pct>0){const s=(pct/100)*sqkm;el.textContent=s.toFixed(3)+' קמ״ר  •  '+Math.round(s*1000)+' דונם';}
+    else el.textContent='—';
   });
-
-  const bar = document.getElementById('terrain-bar');
-  bar.style.width = Math.min(totalPct, 100) + '%';
-  bar.style.background = totalPct > 100 ? '#E24B4A' : totalPct === 100 ? '#1D9E75' : '#534AB7';
-
-  const pctEl = document.getElementById('terrain-sum-pct');
-  const statusEl = document.getElementById('terrain-sum-status');
-  pctEl.textContent = totalPct.toFixed(0) + '%';
-
-  if (totalPct === 100) {
-    pctEl.style.color = 'var(--color-text-success)';
-    statusEl.innerHTML = '<span class="sum-ok"><i class="ti ti-check" style="font-size:14px;vertical-align:-2px;"></i> תקין</span>';
-  } else if (totalPct > 100) {
-    pctEl.style.color = 'var(--color-text-danger)';
-    statusEl.innerHTML = '<span class="sum-err">חורג ב-' + (totalPct - 100).toFixed(0) + '%</span>';
-  } else if (totalPct > 0) {
-    pctEl.style.color = 'var(--color-text-primary)';
-    statusEl.innerHTML = '<span style="color:var(--color-text-tertiary);font-size:12px;">נשאר ' + (100 - totalPct).toFixed(0) + '%</span>';
-  } else {
-    pctEl.style.color = 'var(--color-text-tertiary)';
-    statusEl.textContent = '';
-  }
+  const bar=document.getElementById('terrain-bar');
+  bar.style.width=Math.min(tot,100)+'%';
+  bar.style.background=tot>100?'var(--red)':tot===100?'var(--grn)':'var(--pur)';
+  const ps=document.getElementById('terrain-sum-pct'), ss=document.getElementById('terrain-sum-status');
+  ps.textContent=tot.toFixed(0)+'%';
+  if(tot===100){ps.style.color='var(--grn-t)';ss.innerHTML='<span style="color:var(--grn-t)"><i class="ti ti-check"></i> תקין</span>';}
+  else if(tot>100){ps.style.color='var(--red-t)';ss.innerHTML='<span style="color:var(--red-t)">חורג ב-'+(tot-100).toFixed(0)+'%</span>';}
+  else if(tot>0){ps.style.color='var(--txt)';ss.innerHTML='<span style="color:var(--txt3);font-size:12px;">נשאר '+(100-tot).toFixed(0)+'%</span>';}
+  else{ps.style.color='var(--txt3)';ss.textContent='';}
 }
 
-function setGCP(val, el) {
-  state.gcp = val;
-  document.querySelectorAll('[onclick^="setGCP"]').forEach(e => e.classList.remove('active'));
+// =================== RADIO / CHIP ===================
+function setRadio(key,val,el) {
+  state[key]=val;
+  document.querySelectorAll('[onclick^="setRadio(\''+key+'\'"]').forEach(e=>e.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('gcp-count-field').classList.toggle('hidden', val === 'none' || val === 'client');
+  const ob=document.getElementById(key+'-other-text');
+  if(ob) ob.classList.toggle('hidden',val!=='other');
+  if(key==='mapType') document.getElementById('update-year-field').classList.toggle('hidden',val!=='update');
+  if(key==='aiUsed') updateAINote();
 }
-
-function setContours(val, el) {
-  state.contours = val;
-  document.querySelectorAll('[onclick^="setContours"]').forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('contour-fields').classList.toggle('hidden', val === 'no');
-}
-
-function setParcels(val, el) {
-  state.parcels = val;
-  document.querySelectorAll('[onclick^="setParcels"]').forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('parcels-fields').classList.toggle('hidden', val === 'no');
-}
-
-function setDtm(val, el) {
-  state.dtm = val;
-  document.querySelectorAll('[onclick^="setDtm"]').forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('dtm-other-text').classList.toggle('hidden', val !== 'other');
-}
-
-function setRadio(key, val, el) {
-  state[key] = val;
-  const all = document.querySelectorAll('[onclick^="setRadio(\'' + key + '\'"]');
-  all.forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
-  const otherBox = document.getElementById(key + '-other-text');
-  if (otherBox) otherBox.classList.toggle('hidden', val !== 'other');
-}
-
-function toggleChip(el, group) {
+function toggleChip(el,grp) {
   el.classList.toggle('active');
-  const vals = [];
-  document.querySelectorAll('[onclick^="toggleChip(this,\'' + group + '\'"]').forEach(e => {
-    if (e.classList.contains('active')) vals.push(e.dataset.val);
-  });
-  if (group === 'grid') state.grids = vals;
-  if (group === 'spec') state.specs = vals;
-  if (group === 'fmt') state.formats = vals;
-  const otherBox = document.getElementById(group + '-other-text');
-  if (otherBox) otherBox.classList.toggle('hidden', !vals.includes('other'));
+  const vals=[];
+  document.querySelectorAll('[onclick^="toggleChip(this,\''+grp+'\'"]').forEach(e=>{if(e.classList.contains('active'))vals.push(e.dataset.val);});
+  state[grp==='grid'?'grids':grp==='spec'?'specs':'formats']=vals;
+  const ob=document.getElementById(grp+'-other-text');
+  if(ob) ob.classList.toggle('hidden',!vals.includes('other'));
+}
+function setGCP(val,el) {
+  state.gcp=val;
+  document.querySelectorAll('[onclick^="setGCP"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('gcp-fields').classList.toggle('hidden',val==='none'||val==='client');
+}
+function setContours(val,el) {
+  state.contours=val;
+  document.querySelectorAll('[onclick^="setContours"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('contour-fields').classList.toggle('hidden',val==='no');
+}
+function setParcels(val,el) {
+  state.parcels=val;
+  document.querySelectorAll('[onclick^="setParcels"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('parcel-src-field').classList.toggle('hidden',val==='no');
+}
+function setDtm(val,el) {
+  state.dtm=val;
+  document.querySelectorAll('[onclick^="setDtm"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dtm-other-text').classList.toggle('hidden',val!=='other');
+}
+function updateAINote() {
+  const p=loadParams();
+  const n=document.getElementById('ai-discount-note');
+  n.textContent=state.aiUsed==='yes'?'הנחה של '+p.aiDisc+'% על סה״כ התשומות':'';
 }
 
+// =================== CALCULATE ===================
 function calculate() {
-  const areaSqkm = getAreaSqkm();
-  if (areaSqkm <= 0) { alert('נא להזין שטח פרויקט'); return; }
+  const sqkm=getAreaSqkm();
+  if(sqkm<=0){alert('נא להזין שטח פרויקט');return;}
+  const scale=document.getElementById('scale').value;
+  if(!scale){alert('נא לבחור קנ״מ מיפוי');return;}
+  const p=loadParams();
 
-  const scale = document.getElementById('scale').value;
-  if (!scale) { alert('נא לבחור קנ״מ מיפוי'); return; }
-
-  const rows = document.querySelectorAll('#terrain-rows .terrain-row');
-  let terrainFactor = 0, totalPct = 0;
-  rows.forEach(row => {
-    const key = row.dataset.terrain;
-    const pct = parseFloat(row.querySelector('input').value) || 0;
-    totalPct += pct;
-    terrainFactor += (pct / 100) * (terrainFactors[key] || 1.0);
+  // terrain factor
+  let tf=0, totPct=0;
+  const terrainDetail={};
+  document.querySelectorAll('#terrain-rows .t-row').forEach(row=>{
+    const k=row.dataset.terrain, pct=parseFloat(row.querySelector('input').value)||0;
+    totPct+=pct; tf+=(pct/100)*(p.tf[k]||1); terrainDetail[k]=pct;
   });
-  if (totalPct === 0) terrainFactor = 1.0;
+  if(totPct===0) tf=1;
 
-  const scaleFactor = scaleFactors[scale] || 1.0;
-  const baseHours = areaSqkm * 12;
+  const sf=p.sf[scale]||1;
+  const scopeFactor=state.mapScope==='plani'?p.plani:1;
+  const updateFactor=state.mapType==='update'?p.update:1;
+  let base=sqkm*p.base*tf*sf*scopeFactor*updateFactor;
 
-  let gcpAdd = 0;
-  if (state.gcp === 'archive') gcpAdd = 4;
-  else if (state.gcp === 'required') {
-    const cnt = parseInt(document.getElementById('gcp-count').value) || 5;
-    gcpAdd = cnt * 2.5;
-  }
+  let gcpAdd=0;
+  if(state.gcp==='archive') gcpAdd=p.gcpArchive;
+  else if(state.gcp==='required'){const cnt=parseInt(document.getElementById('gcp-count').value)||5; gcpAdd=cnt*p.gcpPer;}
 
-  let productAdd = 0;
-  if (state.contours === 'yes') productAdd += areaSqkm * 3;
-  if (state.printing === 'yes') productAdd += 4;
-  if (state.parcels === 'yes') productAdd += areaSqkm * 2;
-  if (state.dtm !== 'none') {
-    const dtmMap = { '40x40':1,'20x20':1.5,'15x15':2,'10x10':3,'other':2 };
-    productAdd += areaSqkm * (dtmMap[state.dtm] || 0);
-  }
-  if (state.completion === 'yes') productAdd += areaSqkm * 1.5;
-  if (state.coordination === 'yes') productAdd += 6;
+  let prodAdd=0;
+  if(state.contours==='yes') prodAdd+=sqkm*p.contours;
+  if(state.printing==='yes') prodAdd+=p.print;
+  if(state.parcels==='yes') prodAdd+=sqkm*p.parcels;
+  const dtmMap={'40x40':1,'20x20':1.5,'15x15':2,'10x10':3,'other':2};
+  if(state.dtm!=='none') prodAdd+=sqkm*(dtmMap[state.dtm]||0);
+  if(state.completion==='yes') prodAdd+=sqkm*p.completion;
+  if(state.coordination==='yes') prodAdd+=p.coord;
+  if(state.fieldCheck==='yes') prodAdd+=p.field;
 
-  const fmtAdd = Math.max(0, state.formats.length - 1) * 2;
-  const specAdd = state.specs.length * 3;
+  const specAdd=state.specs.reduce((s,v)=>{
+    if(v==='mabat') return s+sqkm*(p.mabat/100)*p.base*sf;
+    return s+p.spec;
+  },0);
+  const fmtAdd=Math.max(0,state.formats.length-1)*p.fmt;
 
-  const totalHours = Math.round((baseHours * terrainFactor * scaleFactor) + gcpAdd + productAdd + fmtAdd + specAdd);
-  const days = Math.ceil(totalHours / 8);
+  let total=base+gcpAdd+prodAdd+specAdd+fmtAdd;
+  let aiSaving=0;
+  if(state.aiUsed==='yes'){aiSaving=total*(p.aiDisc/100);total-=aiSaving;}
+  const totalH=Math.round(total);
+  const days=Math.ceil(totalH/8);
+  let complexity='נמוכה';
+  if(totalH>200) complexity='גבוהה'; else if(totalH>80) complexity='בינונית';
 
-  let complexity = 'נמוכה', complexityClass = 'c-low';
-  if (totalHours > 200) { complexity = 'גבוהה'; complexityClass = 'c-high'; }
-  else if (totalHours > 80) { complexity = 'בינונית'; complexityClass = 'c-med'; }
+  const client=document.getElementById('client-name').value;
+  const company=document.getElementById('client-company').value;
 
-  document.getElementById('res-hours').textContent = totalHours;
-  document.getElementById('res-days').textContent = days;
-  document.getElementById('res-complexity').innerHTML = '<span class="complexity-badge ' + complexityClass + '">' + complexity + '</span>';
+  // render
+  document.getElementById('res-hours').textContent=totalH;
+  document.getElementById('res-days').textContent=days;
+  document.getElementById('res-complexity').innerHTML='<span class="cbadge '+COMPLEXITY_MAP[complexity]+'">'+complexity+'</span>';
+  document.getElementById('result-client').textContent=[client,company].filter(Boolean).join(' | ');
+  const aiBadge=document.getElementById('ai-badge');
+  if(state.aiUsed==='yes'){aiBadge.classList.remove('hidden');document.getElementById('ai-pct-show').textContent=p.aiDisc;}
+  else aiBadge.classList.add('hidden');
+  document.getElementById('bd-area').textContent=sqkm.toFixed(3)+' קמ״ר';
+  document.getElementById('bd-terrain').textContent=tf.toFixed(2);
+  document.getElementById('bd-scale').textContent=sf.toFixed(2)+' ('+SCALE_LABELS[scale]+')';
+  document.getElementById('bd-scope').textContent=(scopeFactor*updateFactor).toFixed(2)+(state.mapScope==='plani'?' (פלנימטריה)':'')+(state.mapType==='update'?' (עדכון)':'');
+  document.getElementById('bd-gcp').textContent=gcpAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-products').textContent=prodAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-formats').textContent=fmtAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-spec').textContent=specAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-ai').textContent=aiSaving>0?'-'+aiSaving.toFixed(1)+' שע׳':'—';
+  document.getElementById('bd-total').innerHTML='<strong>'+totalH+' שעות</strong>';
 
-  const client = document.getElementById('client-name').value;
-  const company = document.getElementById('client-company').value;
-  const clientStr = [client, company].filter(Boolean).join(' | ');
-  document.getElementById('result-client').textContent = clientStr;
-
-  document.getElementById('bd-area').textContent = areaSqkm.toFixed(3) + ' קמ״ר';
-  document.getElementById('bd-terrain').textContent = terrainFactor.toFixed(2);
-  document.getElementById('bd-scale').textContent = scaleFactor.toFixed(2) + ' (1:' + scale + ')';
-  document.getElementById('bd-gcp').textContent = gcpAdd.toFixed(1) + ' שע׳';
-  document.getElementById('bd-products').textContent = productAdd.toFixed(1) + ' שע׳';
-  document.getElementById('bd-formats').textContent = fmtAdd + ' שע׳';
-  document.getElementById('bd-spec').textContent = specAdd + ' שע׳';
-  document.getElementById('bd-total').innerHTML = '<strong>' + totalHours + ' שעות</strong>';
-
-  const summary = buildSummaryText();
-  document.getElementById('whatsapp-btn').href = 'https://wa.me/?text=' + encodeURIComponent(summary);
-  document.getElementById('email-btn').href = 'mailto:?subject=' + encodeURIComponent('הערכת תשומות מיפוי') + '&body=' + encodeURIComponent(summary);
+  const txt=buildSummary(client,company,sqkm,scale,totalH,days,complexity);
+  document.getElementById('wa-btn').href='https://wa.me/?text='+encodeURIComponent(txt);
+  document.getElementById('mail-btn').href='mailto:?subject='+encodeURIComponent('הערכת תשומות מיפוי')+'&body='+encodeURIComponent(txt);
 
   document.getElementById('results-panel').classList.remove('hidden');
-  document.getElementById('results-panel').scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('results-panel').scrollIntoView({behavior:'smooth',block:'start'});
 
+  // save history
   saveToHistory({
-    timestamp: Date.now(),
-    client: client || '',
-    company: company || '',
-    areaSqkm: areaSqkm,
-    scale: scale,
-    terrainFactor: terrainFactor,
-    totalHours: totalHours,
-    days: days,
-    complexity: complexity
+    timestamp:Date.now(), client, company, areaSqkm:sqkm,
+    scale, terrainDetail, totalHours:totalH, days, complexity,
+    specs:[...state.specs], formats:[...state.formats],
+    mapType:state.mapType, mapScope:state.mapScope, aiUsed:state.aiUsed
   });
 }
 
-function buildSummaryText() {
-  const client = document.getElementById('client-name').value || '—';
-  const company = document.getElementById('client-company').value || '—';
-  const hours = document.getElementById('res-hours').textContent;
-  const days = document.getElementById('res-days').textContent;
-  const area = getAreaSqkm().toFixed(3);
-  return 'הערכת תשומות מיפוי פוטוגרמטרי\n' +
-    'לקוח: ' + client + ' | ' + company + '\n' +
-    'שטח: ' + area + ' קמ״ר\n' +
-    'שעות משוערות: ' + hours + ' שע׳\n' +
-    'ימי עבודה: ' + days + ' ימים';
+function buildSummary(client,company,sqkm,scale,hours,days,complexity) {
+  return 'הערכת תשומות מיפוי פוטוגרמטרי\n'
+    +(client?'לקוח: '+client+(company?' | '+company:'')+'\n':'')
+    +'שטח: '+sqkm.toFixed(3)+' קמ״ר\n'
+    +'קנ״מ: '+(SCALE_LABELS[scale]||scale)+'\n'
+    +'שעות משוערות: '+hours+' שע׳\n'
+    +'ימי עבודה: '+days+' ימים\n'
+    +'מורכבות: '+complexity;
 }
 
-function copySummary() {
-  const text = buildSummaryText();
-  const btn = document.getElementById('copy-btn');
-  const original = btn.innerHTML;
-  function done(ok) {
-    btn.innerHTML = ok
-      ? '<i class="ti ti-check" aria-hidden="true"></i> הועתק'
-      : '<i class="ti ti-x" aria-hidden="true"></i> שגיאה';
-    setTimeout(() => { btn.innerHTML = original; }, 1500);
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => done(true)).catch(() => done(false));
-  } else {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      done(true);
-    } catch (e) {
-      done(false);
-    }
-  }
+function copyResult() {
+  const h=document.getElementById('res-hours').textContent, d=document.getElementById('res-days').textContent;
+  const sqkm=getAreaSqkm(), scale=document.getElementById('scale').value;
+  const txt=buildSummary(document.getElementById('client-name').value,document.getElementById('client-company').value,sqkm,scale,h,d,'');
+  const btn=document.getElementById('copy-btn'), orig=btn.innerHTML;
+  if(navigator.clipboard) navigator.clipboard.writeText(txt);
+  btn.innerHTML='<i class="ti ti-check"></i> הועתק';
+  setTimeout(()=>btn.innerHTML=orig,1500);
 }
 
-const HISTORY_KEY = 'mipui_pricing_history_v1';
-const HISTORY_LIMIT = 200;
-
-function loadHistory() {
-  try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    return [];
-  }
+// =================== NEW CALC + UNDO ===================
+function newCalcWithUndo() {
+  undoData = captureFormState();
+  resetForm();
+  let sec=30;
+  document.getElementById('undo-timer').textContent=sec;
+  document.getElementById('undo-banner').classList.remove('hidden');
+  if(undoInterval) clearInterval(undoInterval);
+  undoInterval=setInterval(()=>{
+    sec--;
+    document.getElementById('undo-timer').textContent=sec;
+    if(sec<=0){clearInterval(undoInterval);document.getElementById('undo-banner').classList.add('hidden');undoData=null;}
+  },1000);
+}
+function undoReset() {
+  if(!undoData) return;
+  clearInterval(undoInterval);
+  document.getElementById('undo-banner').classList.add('hidden');
+  restoreFormState(undoData);
+  undoData=null;
 }
 
-function saveHistoryList(list) {
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
-    return true;
-  } catch (e) {
-    return false;
-  }
+function captureFormState() {
+  const terrainVals={};
+  document.querySelectorAll('#terrain-rows .t-row').forEach(r=>{terrainVals[r.dataset.terrain]=r.querySelector('input').value;});
+  return {
+    client:document.getElementById('client-name').value,
+    company:document.getElementById('client-company').value,
+    area:document.getElementById('area-val').value,
+    unit:state.unit, scale:document.getElementById('scale').value,
+    terrainVals, state:{...state}
+  };
 }
-
-function saveToHistory(entry) {
-  const list = loadHistory();
-  list.unshift(entry);
-  if (list.length > HISTORY_LIMIT) list.length = HISTORY_LIMIT;
-  saveHistoryList(list);
-  renderHistory();
-}
-
-function deleteHistoryEntry(timestamp) {
-  const list = loadHistory().filter(e => e.timestamp !== timestamp);
-  saveHistoryList(list);
-  renderHistory();
-}
-
-function clearHistory() {
-  if (!confirm('האם למחוק את כל היסטוריית החישובים? פעולה זו אינה הפיכה.')) return;
-  saveHistoryList([]);
-  renderHistory();
-}
-
-const scaleLabels = { '250':'1:250','500':'1:500','1000':'1:1,000','2500':'1:2,500','5000':'1:5,000','10000':'1:10,000' };
-const complexityClassMap = { 'נמוכה':'c-low', 'בינונית':'c-med', 'גבוהה':'c-high' };
-
-function formatDate(ts) {
-  const d = new Date(ts);
-  return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-}
-
-function renderHistory() {
-  const list = loadHistory();
-  const countEl = document.getElementById('history-count');
-  const emptyEl = document.getElementById('history-empty');
-  const statsEl = document.getElementById('history-stats');
-  const listEl = document.getElementById('history-list');
-  const actionsEl = document.getElementById('history-actions');
-
-  countEl.textContent = list.length + (list.length === 1 ? ' רשומה' : ' רשומות');
-
-  if (list.length === 0) {
-    emptyEl.classList.remove('hidden');
-    statsEl.classList.add('hidden');
-    actionsEl.classList.add('hidden');
-    listEl.innerHTML = '';
-    return;
-  }
-
-  emptyEl.classList.add('hidden');
-  actionsEl.classList.remove('hidden');
-
-  let totalArea = 0, totalHours = 0;
-  const scaleCounts = {};
-  list.forEach(e => {
-    totalArea += e.areaSqkm || 0;
-    totalHours += e.totalHours || 0;
-    if (e.scale) scaleCounts[e.scale] = (scaleCounts[e.scale] || 0) + 1;
+function restoreFormState(d) {
+  document.getElementById('client-name').value=d.client;
+  document.getElementById('client-company').value=d.company;
+  document.getElementById('area-val').value=d.area;
+  document.getElementById('scale').value=d.scale;
+  document.querySelectorAll('#terrain-rows .t-row').forEach(r=>{
+    r.querySelector('input').value=d.terrainVals[r.dataset.terrain]||'';
   });
-  const avgRate = totalArea > 0 ? (totalHours / totalArea) : 0;
-  let commonScale = '—', commonScaleCount = 0;
-  Object.keys(scaleCounts).forEach(s => {
-    if (scaleCounts[s] > commonScaleCount) { commonScaleCount = scaleCounts[s]; commonScale = s; }
+  updateArea(); updateTerrain();
+}
+
+function resetForm() {
+  document.getElementById('client-name').value='';
+  document.getElementById('client-company').value='';
+  document.getElementById('area-val').value='';
+  document.getElementById('area-display').textContent='';
+  document.getElementById('scale').value='';
+  document.querySelectorAll('#terrain-rows .t-row input').forEach(i=>i.value='');
+  document.querySelectorAll('.chip.active').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('textarea').forEach(t=>{t.value='';t.classList.add('hidden');});
+  state.grids=[];state.specs=[];state.formats=[];
+  setUnit('sqkm',document.querySelector('[onclick^="setUnit"]'));
+  setGCP('none',document.querySelector('[onclick^="setGCP"]'));
+  ['completion','coordination','printing','fieldCheck','aiUsed'].forEach(k=>{
+    const el=document.querySelector('[onclick^="setRadio(\''+k+'\',\'no\'"]');
+    if(el) setRadio(k,'no',el);
   });
+  setRadio('mapType','new',document.querySelector('[onclick^="setRadio(\'mapType\',\'new\'"]'));
+  setRadio('mapScope','full',document.querySelector('[onclick^="setRadio(\'mapScope\',\'full\'"]'));
+  setContours('no',document.querySelector('[onclick^="setContours"][onclick*="\'no\'"]'));
+  setParcels('no',document.querySelector('[onclick^="setParcels"][onclick*="\'no\'"]'));
+  setDtm('none',document.querySelector('[onclick^="setDtm"][onclick*="\'none\'"]'));
+  document.getElementById('results-panel').classList.add('hidden');
+  updateTerrain();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
-  document.getElementById('stat-total-area').textContent = totalArea.toFixed(2);
-  document.getElementById('stat-avg-rate').textContent = avgRate.toFixed(1);
-  document.getElementById('stat-total-hours').textContent = Math.round(totalHours).toLocaleString('he-IL');
-  document.getElementById('stat-common-scale').textContent = commonScale !== '—' ? scaleLabels[commonScale] || commonScale : '—';
-  document.getElementById('stat-common-scale-sub').textContent = commonScale !== '—' ? (commonScaleCount + ' מתוך ' + list.length + ' חישובים') : '';
-  statsEl.classList.remove('hidden');
+// =================== HISTORY ===================
+function loadHistory(){try{const r=localStorage.getItem(HIST_KEY);if(r)return JSON.parse(r);}catch(e){}return[];}
+function saveHistoryArr(arr){localStorage.setItem(HIST_KEY,JSON.stringify(arr));}
+function saveToHistory(entry){
+  const arr=loadHistory();arr.unshift(entry);
+  if(arr.length>HIST_LIMIT)arr.length=HIST_LIMIT;
+  saveHistoryArr(arr);
+}
+function deleteEntry(ts){saveHistoryArr(loadHistory().filter(e=>e.timestamp!==ts));renderHistory();}
+function clearAllHistory(){if(!confirm('מחוק את כל ההיסטוריה? פעולה זו אינה הפיכה.'))return;saveHistoryArr([]);renderHistory();}
 
-  listEl.innerHTML = list.map(e => {
-    const nameParts = [e.client, e.company].filter(Boolean).join(' | ');
-    const title = nameParts || 'חישוב ללא שם לקוח';
-    const compClass = complexityClassMap[e.complexity] || 'c-low';
-    return '<div class="history-item">' +
-      '<div class="history-item-top">' +
-        '<div>' +
-          '<div class="history-item-title">' + escapeHtml(title) + '</div>' +
-          '<div class="history-item-date">' + formatDate(e.timestamp) + '</div>' +
-        '</div>' +
-        '<div style="display:flex; align-items:center; gap:6px;">' +
-          '<div style="text-align:left;">' +
-            '<div class="history-item-hours">' + e.totalHours + ' שע׳</div>' +
-            '<div class="history-item-date">' + e.days + ' ימים</div>' +
-          '</div>' +
-          '<button class="history-del-btn" onclick="deleteHistoryEntry(' + e.timestamp + ')" aria-label="מחק רשומה"><i class="ti ti-trash" aria-hidden="true"></i></button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="history-item-meta">' +
-        '<span>שטח: ' + e.areaSqkm.toFixed(2) + ' קמ״ר</span>' +
-        '<span>קנ״מ: ' + (scaleLabels[e.scale] || e.scale || '—') + '</span>' +
-        '<span><span class="complexity-badge ' + compClass + '">' + e.complexity + '</span></span>' +
-      '</div>' +
-    '</div>';
+function formatDate(ts){
+  const d=new Date(ts);
+  return d.toLocaleDateString('he-IL')+' '+d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+}
+function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function renderHistory(){
+  let list=loadHistory();
+  const fs=document.getElementById('filter-scale').value;
+  const fc=document.getElementById('filter-complexity').value;
+  if(fs) list=list.filter(e=>e.scale===fs);
+  if(fc) list=list.filter(e=>e.complexity===fc);
+
+  document.getElementById('hist-count').textContent=list.length+' רשומות';
+  const empty=document.getElementById('hist-empty');
+  const wrap=document.getElementById('hist-table-wrap');
+  const actions=document.getElementById('hist-actions');
+  const stats=document.getElementById('hist-stats');
+  const filters=document.getElementById('hist-filters');
+  const all=loadHistory();
+
+  if(all.length===0){empty.classList.remove('hidden');wrap.classList.add('hidden');actions.classList.add('hidden');stats.classList.add('hidden');filters.classList.add('hidden');return;}
+  empty.classList.add('hidden');wrap.classList.remove('hidden');actions.classList.remove('hidden');stats.classList.remove('hidden');filters.classList.remove('hidden');
+
+  // stats on full list
+  let totArea=0,totHours=0;
+  const scaleCount={},terrainCount={};
+  all.forEach(e=>{
+    totArea+=e.areaSqkm||0;totHours+=e.totalHours||0;
+    if(e.scale)scaleCount[e.scale]=(scaleCount[e.scale]||0)+1;
+    if(e.terrainDetail){Object.entries(e.terrainDetail).forEach(([k,v])=>{if(v>0)terrainCount[k]=(terrainCount[k]||0)+parseFloat(v);});}
+  });
+  const rate=totArea>0?totHours/totArea:0;
+  let topScale='—',topScaleN=0;
+  Object.keys(scaleCount).forEach(s=>{if(scaleCount[s]>topScaleN){topScaleN=scaleCount[s];topScale=s;}});
+  let topTerrain='—',topTerrainN=0;
+  Object.keys(terrainCount).forEach(k=>{if(terrainCount[k]>topTerrainN){topTerrainN=terrainCount[k];topTerrain=k;}});
+  document.getElementById('st-area').textContent=totArea.toFixed(1);
+  document.getElementById('st-rate').textContent=rate.toFixed(1);
+  document.getElementById('st-scale').textContent=topScale!=='—'?SCALE_LABELS[topScale]||topScale:'—';
+  document.getElementById('st-scale-sub').textContent=topScale!=='—'?topScaleN+' פרויקטים':'';
+  document.getElementById('st-terrain').textContent=topTerrain!=='—'?(TERRAIN_LABELS[topTerrain]||topTerrain):'—';
+  document.getElementById('st-terrain-sub').textContent='';
+
+  const tbody=document.getElementById('hist-tbody');
+  tbody.innerHTML=list.map(e=>{
+    const name=escHtml([e.client,e.company].filter(Boolean).join(' / ')||'ללא שם');
+    const terrainStr=e.terrainDetail?Object.entries(e.terrainDetail).filter(([k,v])=>parseFloat(v)>0).map(([k,v])=>(TERRAIN_LABELS[k]||k)+' '+v+'%').join(', '):'—';
+    const cc=COMPLEXITY_MAP[e.complexity]||'c-low';
+    return '<tr>'
+      +'<td style="white-space:nowrap;font-size:11px;">'+formatDate(e.timestamp)+'</td>'
+      +'<td>'+name+'</td>'
+      +'<td>'+parseFloat(e.areaSqkm||0).toFixed(2)+'</td>'
+      +'<td>'+(SCALE_LABELS[e.scale]||e.scale||'—')+'</td>'
+      +'<td style="font-size:11px;max-width:130px;">'+terrainStr+'</td>'
+      +'<td style="font-weight:500;">'+e.totalHours+'</td>'
+      +'<td><span class="cbadge '+cc+'">'+e.complexity+'</span></td>'
+      +'<td><div class="hist-actions">'
+        +'<button class="btn-sm" onclick="loadEntry('+e.timestamp+')" title="טען חישוב זה">טען</button>'
+        +'<button class="btn-sm btn-danger" onclick="deleteEntry('+e.timestamp+')" title="מחק">✕</button>'
+      +'</div></td>'
+      +'</tr>';
   }).join('');
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+function loadEntry(ts) {
+  const e=loadHistory().find(x=>x.timestamp===ts);
+  if(!e) return;
+  showTab('calc',document.querySelector('.tab'));
+  document.querySelectorAll('.tab')[0].click();
+  setTimeout(()=>{
+    document.getElementById('client-name').value=e.client||'';
+    document.getElementById('client-company').value=e.company||'';
+    document.getElementById('area-val').value=e.areaSqkm||'';
+    document.getElementById('scale').value=e.scale||'';
+    if(e.terrainDetail){
+      document.querySelectorAll('#terrain-rows .t-row').forEach(r=>{
+        r.querySelector('input').value=e.terrainDetail[r.dataset.terrain]||'';
+      });
+    }
+    updateArea();updateTerrain();
+    window.scrollTo({top:0,behavior:'smooth'});
+  },100);
 }
 
-function exportHistoryCSV() {
-  const list = loadHistory();
-  if (list.length === 0) return;
-  const headers = ['תאריך','לקוח','חברה','שטח (קמ"ר)','קנ"מ','מקדם אופי שטח','שעות','ימים','מורכבות'];
-  const rows = list.map(e => [
-    formatDate(e.timestamp),
-    e.client || '',
-    e.company || '',
-    e.areaSqkm.toFixed(3),
-    scaleLabels[e.scale] || e.scale || '',
-    e.terrainFactor.toFixed(2),
-    e.totalHours,
-    e.days,
-    e.complexity
+function exportCSV(){
+  const list=loadHistory();
+  if(!list.length)return;
+  const hdrs=['תאריך','לקוח','חברה','שטח קמ"ר','קנ"מ','אופי שטח','שעות','ימים','מורכבות','AI'];
+  const rows=list.map(e=>[
+    formatDate(e.timestamp),e.client||'',e.company||'',
+    parseFloat(e.areaSqkm||0).toFixed(3),SCALE_LABELS[e.scale]||e.scale||'',
+    e.terrainDetail?Object.entries(e.terrainDetail).filter(([k,v])=>parseFloat(v)>0).map(([k,v])=>TERRAIN_LABELS[k]+' '+v+'%').join('; '):'',
+    e.totalHours,e.days,e.complexity,e.aiUsed==='yes'?'כן':'לא'
   ]);
-  const csvLines = [headers, ...rows].map(row =>
-    row.map(val => '"' + String(val).replace(/"/g, '""') + '"').join(',')
-  );
-  const csvContent = '\uFEFF' + csvLines.join('\r\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'היסטוריית-תשומות-' + new Date().toISOString().slice(0,10) + '.csv';
-  document.body.appendChild(a);
+  const csv='\uFEFF'+[hdrs,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='היסטוריית-תשומות-'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
 
-renderHistory();
-
-window.addEventListener('load', function() {
-  const aoiArea = localStorage.getItem('aoi_send_area');
-  if (aoiArea) {
-    const areaVal = document.getElementById('area-val');
-    areaVal.value = parseFloat(aoiArea).toFixed(4);
-    setUnit('sqkm', document.querySelector('[onclick^="setUnit"]'));
-    updateArea();
-    localStorage.removeItem('aoi_send_area');
-    areaVal.style.outline = '3px solid #534AB7';
-    setTimeout(() => areaVal.style.outline = '', 2500);
+// =================== ADMIN ===================
+let adminLoggedIn=false;
+function adminLogin(){
+  const pwd=document.getElementById('admin-pwd').value;
+  if(pwd===getAdminPwd()){
+    adminLoggedIn=true;
+    document.getElementById('admin-lock').classList.add('hidden');
+    document.getElementById('admin-panel').classList.remove('hidden');
+    loadAdminPanel();
+  } else {
+    document.getElementById('admin-err').textContent='סיסמה שגויה';
+    setTimeout(()=>document.getElementById('admin-err').textContent='',2000);
   }
-});
+}
+function adminLogout(){
+  adminLoggedIn=false;
+  document.getElementById('admin-lock').classList.remove('hidden');
+  document.getElementById('admin-panel').classList.add('hidden');
+  document.getElementById('admin-pwd').value='';
+}
+function loadAdminPanel(){
+  if(!adminLoggedIn)return;
+  const p=loadParams();
+  document.getElementById('p-base').value=p.base;
+  document.getElementById('p-ai-disc').value=p.aiDisc;
+  document.getElementById('p-mabat').value=p.mabat;
+  document.getElementById('p-extra-scale').value=p.extraScale;
+  Object.keys(DEFAULT_PARAMS.tf).forEach(k=>{const el=document.getElementById('tf-'+k);if(el)el.value=p.tf[k];});
+  Object.keys(DEFAULT_PARAMS.sf).forEach(k=>{const el=document.getElementById('sf-'+k);if(el)el.value=p.sf[k];});
+  ['gcpArchive','gcpPer','contours','parcels','print','completion','coord','field','plani','update','spec','fmt'].forEach(k=>{
+    const el=document.getElementById('p-'+k);if(el)el.value=p[k];
+  });
+}
+function saveParams(){
+  const p=loadParams();
+  p.base=parseFloat(document.getElementById('p-base').value)||p.base;
+  p.aiDisc=parseFloat(document.getElementById('p-ai-disc').value)||p.aiDisc;
+  p.mabat=parseFloat(document.getElementById('p-mabat').value)||p.mabat;
+  p.extraScale=parseFloat(document.getElementById('p-extra-scale').value)||p.extraScale;
+  Object.keys(DEFAULT_PARAMS.tf).forEach(k=>{const el=document.getElementById('tf-'+k);if(el)p.tf[k]=parseFloat(el.value)||p.tf[k];});
+  Object.keys(DEFAULT_PARAMS.sf).forEach(k=>{const el=document.getElementById('sf-'+k);if(el)p.sf[k]=parseFloat(el.value)||p.sf[k];});
+  ['gcpArchive','gcpPer','contours','parcels','print','completion','coord','field','plani','update','spec','fmt'].forEach(k=>{
+    const el=document.getElementById('p-'+k);if(el)p[k]=parseFloat(el.value)||p[k];
+  });
+  saveParamsObj(p);
+  const msg=document.getElementById('save-msg');
+  msg.style.color='var(--grn-t)';msg.textContent='✓ הפרמטרים נשמרו בהצלחה';
+  setTimeout(()=>msg.textContent='',2500);
+}
+function resetParams(){
+  if(!confirm('לאפס את כל הפרמטרים לברירת מחדל?'))return;
+  saveParamsObj(JSON.parse(JSON.stringify(DEFAULT_PARAMS)));
+  loadAdminPanel();
+  const msg=document.getElementById('save-msg');
+  msg.style.color='var(--amb-t)';msg.textContent='אופס לברירת מחדל';
+  setTimeout(()=>msg.textContent='',2000);
+}
+function changePwd(){
+  const p1=document.getElementById('new-pwd1').value,p2=document.getElementById('new-pwd2').value;
+  const msg=document.getElementById('pwd-msg');
+  if(!p1){msg.style.color='var(--red-t)';msg.textContent='הכנס סיסמה חדשה';return;}
+  if(p1!==p2){msg.style.color='var(--red-t)';msg.textContent='הסיסמאות אינן תואמות';return;}
+  localStorage.setItem(ADMIN_PWD_KEY,p1);
+  msg.style.color='var(--grn-t)';msg.textContent='✓ הסיסמה עודכנה';
+  document.getElementById('new-pwd1').value='';document.getElementById('new-pwd2').value='';
+  setTimeout(()=>msg.textContent='',2000);
+}
 
-function newCalculation() {
-  if (!confirm('האם להתחיל חישוב חדש? החישוב הנוכחי כבר נשמר בהיסטוריה.')) return;
-
-  document.getElementById('client-name').value = '';
-  document.getElementById('client-company').value = '';
-
-  document.getElementById('area-val').value = '';
-  document.getElementById('area-display').textContent = '';
-  setUnit('sqkm', document.querySelector('[onclick^="setUnit"]'));
-
-  document.querySelectorAll('#terrain-rows .terrain-row input').forEach(inp => inp.value = '');
-  updateTerrain();
-
-  document.getElementById('scale').value = '';
-
-  document.querySelectorAll('.chip.active').forEach(chip => chip.classList.remove('active'));
-  state.grids = [];
-  state.specs = [];
-  state.formats = [];
-  document.querySelectorAll('.other-text').forEach(ta => { ta.value = ''; ta.classList.add('hidden'); });
-
-  setGCP('none', document.querySelector('[onclick^="setGCP"]'));
-  document.getElementById('gcp-count').value = '';
-
-  setRadio('completion', 'no', document.querySelector('[onclick^="setRadio(\'completion\',\'no\'"]'));
-  setRadio('coordination', 'no', document.querySelector('[onclick^="setRadio(\'coordination\',\'no\'"]'));
-  setRadio('printing', 'no', document.querySelector('[onclick^="setRadio(\'printing\',\'no\'"]'));
-
-  setContours('no', document.querySelector('[onclick^="setContours"][onclick*="\'no\'"]'));
-  document.getElementById('contour-interval').value = '';
-  document.getElementById('gsd').value = '';
-
-  setParcels('no', document.querySelector('[onclick^="setParcels"][onclick*="\'no\'"]'));
-  state.parcelSource = '';
-
-  setDtm('none', document.querySelector('[onclick^="setDtm"][onclick*="\'none\'"]'));
-
-  document.getElementById('results-panel').classList.add('hidden');
-
-  document.getElementById('client-name').focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+// =================== INIT ===================
+renderHistory();
+updateAINote();
+const aoiArea=localStorage.getItem('aoi_send_area');
+if(aoiArea){
+  document.getElementById('area-val').value=parseFloat(aoiArea).toFixed(4);
+  updateArea();
+  localStorage.removeItem('aoi_send_area');
+  const av=document.getElementById('area-val');
+  av.style.outline='3px solid var(--pur)';
+  setTimeout(()=>av.style.outline='',2500);
 }
 </script>
 </body>
