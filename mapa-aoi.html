@@ -100,7 +100,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
     <div class="topbar-title"><i class="ti ti-map-2" aria-hidden="true"></i> תיחום AOI — מיפוי פוטוגרמטרי</div>
     <div class="topbar-sub">ציור פוליגון ידני או העלאת קובץ SHP/GeoJSON</div>
   </div>
-  <a href="mihshvon-tashumot-mipui.html" class="btn" style="width:auto;"><i class="ti ti-arrow-right" aria-hidden="true"></i> למחשבון תשומות</a>
+  <a href="index.html" class="btn" style="width:auto;"><i class="ti ti-arrow-right" aria-hidden="true"></i> למחשבון תשומות</a>
 </div>
 
 <div class="layout">
@@ -508,7 +508,7 @@ function sendToCalc() {
   localStorage.setItem('aoi_send_area', sqkm);
   localStorage.setItem('aoi_send_unit', 'sqkm');
   alert('השטח ' + parseFloat(sqkm).toFixed(3) + ' קמ״ר הועבר. פתח את מחשבון התשומות — הוא יטען את הנתון אוטומטית.');
-  window.location.href = 'mihshvon-tashumot-mipui.html';
+  window.location.href = 'index.html';
 }
 
 function itmToWGS84(E, N) {
