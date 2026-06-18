@@ -110,6 +110,17 @@ body{padding:1rem;}
 @media(max-width:500px){.admin-grid{grid-template-columns:1fr;}}
 .admin-lock{text-align:center;padding:2rem 1rem;}
 .admin-lock input[type=password]{font-size:15px;padding:10px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);width:200px;text-align:center;display:block;margin:0 auto .75rem;}
+/* Admin list */
+.admin-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:.5px solid var(--brd);border-radius:var(--rmd);margin-bottom:6px;background:var(--bg);}
+.admin-list-item .a-name{font-size:13px;font-weight:500;}
+.admin-list-item .a-you{font-size:11px;color:var(--grn-t);background:var(--grn-l);padding:2px 8px;border-radius:20px;}
+/* GEO */
+.geo-layer-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:.5px solid var(--brd);border-radius:var(--rmd);margin-bottom:6px;background:var(--bg);}
+.geo-layer-item .g-name{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.geo-layer-item .g-type{font-size:11px;color:var(--txt3);margin:0 8px;}
+.geo-drop{border:1.5px dashed var(--brd2);border-radius:var(--rlg);padding:1.5rem;text-align:center;cursor:pointer;transition:background .15s;}
+.geo-drop.drag-over{background:var(--pur-l);border-color:var(--pur);}
+.geo-drop p{font-size:13px;color:var(--txt2);margin-top:6px;}
 
 .chip-info{display:inline-block;background:var(--pur-l);color:var(--pur-d);border-radius:20px;padding:2px 9px;font-size:11px;}
 .hidden{display:none!important;}
@@ -127,6 +138,7 @@ body{padding:1rem;}
 <div class="tabs">
   <button class="tab active" onclick="showTab('calc',this)"><i class="ti ti-calculator"></i> חישוב</button>
   <button class="tab" onclick="showTab('hist',this)"><i class="ti ti-history"></i> היסטוריה</button>
+  <button class="tab" onclick="showTab('geo',this)"><i class="ti ti-layers-intersect"></i> שכבות</button>
   <button class="tab" onclick="showTab('admin',this)"><i class="ti ti-settings"></i> מנהל</button>
 </div>
 
@@ -473,6 +485,37 @@ body{padding:1rem;}
 
 </div><!-- end tab-hist -->
 
+<!-- ===================== GEO TAB ===================== -->
+<div id="tab-geo" class="tab-content">
+
+<div class="section">
+  <div class="sec-title"><i class="ti ti-layers-intersect"></i> שכבות וקטוריות גיאוגרפיות</div>
+  <p style="font-size:13px;color:var(--txt2);margin-bottom:1rem;">העלה קובץ ZIP המכיל שכבות וקטוריות (SHP, GeoJSON, KML, GPX). השכבות יוצגו ברשימה ויישמרו מקומית.</p>
+  <div class="geo-drop" id="geo-drop" onclick="document.getElementById('geo-file-input').click()">
+    <i class="ti ti-file-zip" style="font-size:28px;color:var(--pur);"></i>
+    <p>לחץ לבחירת קובץ ZIP, או גרור לכאן</p>
+    <p style="font-size:11px;color:var(--txt3);margin-top:4px;">SHP, GeoJSON, KML, GPX — מכווץ ב-ZIP</p>
+  </div>
+  <input type="file" id="geo-file-input" accept=".zip" class="hidden" onchange="handleGeoUpload(this.files[0])"/>
+  <div id="geo-status" style="font-size:12px;margin-top:8px;"></div>
+</div>
+
+<div class="section" id="geo-layers-section" style="display:none;">
+  <div class="sec-title" style="justify-content:space-between;">
+    <span><i class="ti ti-list"></i> שכבות טעונות</span>
+    <span class="chip-info" id="geo-layer-count">0 שכבות</span>
+  </div>
+  <div id="geo-layers-list"></div>
+  <button class="btn-sec btn-danger" style="margin-top:.75rem;" onclick="clearGeoLayers()"><i class="ti ti-trash"></i> נקה את כל השכבות</button>
+</div>
+
+<div class="section" id="geo-detail-section" style="display:none;">
+  <div class="sec-title"><i class="ti ti-info-circle"></i> פרטי שכבה</div>
+  <div id="geo-detail-content" style="font-size:13px;color:var(--txt2);"></div>
+</div>
+
+</div><!-- end tab-geo -->
+
 <!-- ===================== ADMIN TAB ===================== -->
 <div id="tab-admin" class="tab-content">
 
@@ -494,11 +537,12 @@ body{padding:1rem;}
     </div>
   </div>
 
-  <!-- כניסה רגילה -->
+  <!-- כניסה — בחירת מנהל -->
   <div id="admin-lock" class="hidden">
     <div class="admin-lock">
-      <div style="font-size:13px;font-weight:500;margin-bottom:4px;" id="admin-welcome-name"></div>
-      <div style="font-size:13px;color:var(--txt2);margin-bottom:1rem;">הזן סיסמה לגישה לפרמטרי החישוב</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:.75rem;">בחר מנהל</div>
+      <div id="admin-login-list" style="max-width:280px;margin:0 auto .75rem;text-align:right;"></div>
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:8px;" id="admin-login-name-label"></div>
       <input type="password" id="admin-pwd" placeholder="סיסמה" onkeydown="if(event.key==='Enter')adminLogin()"/>
       <button class="btn-primary" style="width:200px;margin:0 auto;" onclick="adminLogin()"><i class="ti ti-login"></i> כניסה</button>
       <div id="admin-err" style="font-size:12px;color:var(--red-t);margin-top:8px;"></div>
@@ -511,9 +555,24 @@ body{padding:1rem;}
       <button class="btn-sm" onclick="adminLogout()">התנתק</button>
     </div>
 
-    <!-- סיסמה -->
+    <!-- ניהול מנהלים -->
     <div class="section" style="margin-bottom:.875rem;">
-      <div class="sec-title"><i class="ti ti-key"></i> שינוי סיסמה</div>
+      <div class="sec-title"><i class="ti ti-users"></i> ניהול מנהלים</div>
+      <div id="admin-list-container" style="margin-bottom:1rem;"></div>
+      <div style="border-top:.5px solid var(--brd);padding-top:.875rem;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:.5rem;">הוסף מנהל חדש</div>
+        <div class="row">
+          <div class="field"><label>שם</label><input type="text" id="new-admin-name" placeholder="שם מלא"/></div>
+          <div class="field"><label>סיסמה</label><input type="password" id="new-admin-pwd" placeholder="לפחות 4 תווים"/></div>
+        </div>
+        <button class="btn-sec" onclick="addAdmin()"><i class="ti ti-user-plus"></i> הוסף מנהל</button>
+        <div id="add-admin-msg" style="font-size:12px;margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <!-- שינוי סיסמה אישית -->
+    <div class="section" style="margin-bottom:.875rem;">
+      <div class="sec-title"><i class="ti ti-key"></i> שינוי הסיסמה שלי</div>
       <div class="row">
         <div class="field"><label>סיסמה חדשה</label><input type="password" id="new-pwd1" placeholder="סיסמה חדשה"/></div>
         <div class="field"><label>אימות</label><input type="password" id="new-pwd2" placeholder="חזור על הסיסמה"/></div>
@@ -630,6 +689,7 @@ function showTab(name, el) {
   el.classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
   if(name==='hist') renderHistory();
+  if(name==='geo') renderGeoLayers();
   if(name==='admin') { showAdminScreen(); if(adminLoggedIn) loadAdminPanel(); }
 }
 
@@ -1013,32 +1073,64 @@ function exportCSV(){
   a.click();
 }
 
-// =================== ADMIN ===================
-const ADMIN_META_KEY = 'mipui_admin_meta';
+// =================== MULTI-ADMIN ===================
+const ADMINS_KEY = 'mipui_admins_v1';
 let adminLoggedIn = false;
+let currentAdminId = null;
+let selectedLoginAdminId = null;
 
-function getAdminMeta() {
-  try { const r = localStorage.getItem(ADMIN_META_KEY); if(r) return JSON.parse(r); } catch(e) {}
-  return null;
+function getAdmins() {
+  try { const r = localStorage.getItem(ADMINS_KEY); if(r) return JSON.parse(r); } catch(e) {}
+  return [];
 }
-function getAdminPwd() {
-  const m = getAdminMeta(); return m ? m.pwd : null;
+function saveAdmins(arr) { localStorage.setItem(ADMINS_KEY, JSON.stringify(arr)); }
+
+// migrate legacy single-admin
+function migrateLegacy() {
+  const legacy = localStorage.getItem('mipui_admin_meta');
+  if (legacy && !localStorage.getItem(ADMINS_KEY)) {
+    try {
+      const m = JSON.parse(legacy);
+      if (m && m.name && m.pwd) {
+        saveAdmins([{ id: Date.now(), name: m.name, pwd: m.pwd }]);
+      }
+    } catch(e) {}
+  }
 }
 
 function showAdminScreen() {
-  const meta = getAdminMeta();
-  if (!meta) {
-    // first time — show registration
+  migrateLegacy();
+  const admins = getAdmins();
+  if (!admins.length) {
     document.getElementById('admin-register').classList.remove('hidden');
     document.getElementById('admin-lock').classList.add('hidden');
     document.getElementById('admin-panel').classList.add('hidden');
   } else {
-    // returning admin — show login
     document.getElementById('admin-register').classList.add('hidden');
     document.getElementById('admin-lock').classList.remove('hidden');
     document.getElementById('admin-panel').classList.add('hidden');
-    document.getElementById('admin-welcome-name').textContent = 'שלום, ' + meta.name;
+    renderLoginList(admins);
   }
+}
+
+function renderLoginList(admins) {
+  const container = document.getElementById('admin-login-list');
+  container.innerHTML = admins.map(a =>
+    '<div class="admin-list-item" style="margin-bottom:5px;cursor:pointer;" onclick="selectLoginAdmin('+a.id+',''+escHtml(a.name)+'')" id="login-item-'+a.id+'">'
+    +'<span class="a-name">'+escHtml(a.name)+'</span>'
+    +'<i class="ti ti-chevron-left" style="font-size:14px;color:var(--txt3);"></i>'
+    +'</div>'
+  ).join('');
+  if (admins.length === 1) selectLoginAdmin(admins[0].id, admins[0].name);
+}
+
+function selectLoginAdmin(id, name) {
+  selectedLoginAdminId = id;
+  document.querySelectorAll('[id^="login-item-"]').forEach(el => el.style.background = '');
+  const el = document.getElementById('login-item-' + id);
+  if (el) el.style.background = 'var(--pur-l)';
+  document.getElementById('admin-login-name-label').textContent = 'שם: ' + name;
+  document.getElementById('admin-pwd').focus();
 }
 
 function adminRegister() {
@@ -1049,8 +1141,12 @@ function adminRegister() {
   if (!name) { err.textContent = 'נא להזין שם מנהל'; return; }
   if (p1.length < 4) { err.textContent = 'הסיסמה חייבת להכיל לפחות 4 תווים'; return; }
   if (p1 !== p2) { err.textContent = 'הסיסמאות אינן תואמות'; return; }
-  localStorage.setItem(ADMIN_META_KEY, JSON.stringify({ name, pwd: p1 }));
+  const admins = getAdmins();
+  const newAdmin = { id: Date.now(), name, pwd: p1 };
+  admins.push(newAdmin);
+  saveAdmins(admins);
   err.textContent = '';
+  currentAdminId = newAdmin.id;
   adminLoggedIn = true;
   document.getElementById('admin-register').classList.add('hidden');
   document.getElementById('admin-panel').classList.remove('hidden');
@@ -1059,13 +1155,19 @@ function adminRegister() {
 }
 
 function adminLogin() {
+  if (!selectedLoginAdminId) {
+    const err = document.getElementById('admin-err');
+    err.textContent = 'נא לבחור מנהל'; setTimeout(()=>err.textContent='',2000); return;
+  }
   const pwd = document.getElementById('admin-pwd').value;
-  const meta = getAdminMeta();
-  if (meta && pwd === meta.pwd) {
+  const admins = getAdmins();
+  const admin = admins.find(a => a.id === selectedLoginAdminId);
+  if (admin && pwd === admin.pwd) {
     adminLoggedIn = true;
+    currentAdminId = admin.id;
     document.getElementById('admin-lock').classList.add('hidden');
     document.getElementById('admin-panel').classList.remove('hidden');
-    document.getElementById('admin-name-display').textContent = meta.name;
+    document.getElementById('admin-name-display').textContent = admin.name;
     document.getElementById('admin-pwd').value = '';
     loadAdminPanel();
   } else {
@@ -1077,12 +1179,55 @@ function adminLogin() {
 
 function adminLogout() {
   adminLoggedIn = false;
+  currentAdminId = null;
+  selectedLoginAdminId = null;
   document.getElementById('admin-lock').classList.remove('hidden');
   document.getElementById('admin-panel').classList.add('hidden');
   document.getElementById('admin-pwd').value = '';
+  showAdminScreen();
+}
+
+function renderAdminList() {
+  const admins = getAdmins();
+  const container = document.getElementById('admin-list-container');
+  if (!admins.length) { container.innerHTML = '<div style="font-size:13px;color:var(--txt3);">אין מנהלים</div>'; return; }
+  container.innerHTML = admins.map(a => {
+    const isMe = a.id === currentAdminId;
+    return '<div class="admin-list-item">'
+      +'<span class="a-name">'+escHtml(a.name)+'</span>'
+      +(isMe ? '<span class="a-you">אתה</span>' : '<button class="btn-sm btn-danger" onclick="removeAdmin('+a.id+')"><i class="ti ti-trash"></i></button>')
+      +'</div>';
+  }).join('');
+}
+
+function addAdmin() {
+  const name = document.getElementById('new-admin-name').value.trim();
+  const pwd = document.getElementById('new-admin-pwd').value;
+  const msg = document.getElementById('add-admin-msg');
+  if (!name) { msg.style.color='var(--red-t)'; msg.textContent='נא להזין שם'; return; }
+  if (pwd.length < 4) { msg.style.color='var(--red-t)'; msg.textContent='סיסמה חייבת להכיל לפחות 4 תווים'; return; }
+  const admins = getAdmins();
+  if (admins.find(a => a.name === name)) { msg.style.color='var(--red-t)'; msg.textContent='מנהל עם שם זה כבר קיים'; return; }
+  admins.push({ id: Date.now(), name, pwd });
+  saveAdmins(admins);
+  document.getElementById('new-admin-name').value = '';
+  document.getElementById('new-admin-pwd').value = '';
+  msg.style.color='var(--grn-t)'; msg.textContent='✓ המנהל נוסף בהצלחה';
+  setTimeout(()=>msg.textContent='',2500);
+  renderAdminList();
+}
+
+function removeAdmin(id) {
+  const admins = getAdmins();
+  const admin = admins.find(a => a.id === id);
+  if (!admin) return;
+  if (!confirm('להסיר את המנהל "' + admin.name + '"?')) return;
+  saveAdmins(admins.filter(a => a.id !== id));
+  renderAdminList();
 }
 function loadAdminPanel(){
   if(!adminLoggedIn)return;
+  renderAdminList();
   const p=loadParams();
   document.getElementById('p-base').value=p.base;
   document.getElementById('p-ai-disc').value=p.aiDisc;
@@ -1124,13 +1269,172 @@ function changePwd(){
   if(!p1){msg.style.color='var(--red-t)';msg.textContent='הכנס סיסמה חדשה';return;}
   if(p1.length<4){msg.style.color='var(--red-t)';msg.textContent='סיסמה חייבת להכיל לפחות 4 תווים';return;}
   if(p1!==p2){msg.style.color='var(--red-t)';msg.textContent='הסיסמאות אינן תואמות';return;}
-  const meta=getAdminMeta()||{name:''};
-  meta.pwd=p1;
-  localStorage.setItem(ADMIN_META_KEY,JSON.stringify(meta));
+  const admins=getAdmins();
+  const idx=admins.findIndex(a=>a.id===currentAdminId);
+  if(idx===-1){msg.style.color='var(--red-t)';msg.textContent='שגיאה: מנהל לא נמצא';return;}
+  admins[idx].pwd=p1;
+  saveAdmins(admins);
   msg.style.color='var(--grn-t)';msg.textContent='✓ הסיסמה עודכנה';
   document.getElementById('new-pwd1').value='';document.getElementById('new-pwd2').value='';
   setTimeout(()=>msg.textContent='',2000);
 }
+
+
+// =================== GEO LAYERS ===================
+const GEO_KEY = 'mipui_geo_layers_v1';
+
+function getGeoLayers() {
+  try { const r = localStorage.getItem(GEO_KEY); if(r) return JSON.parse(r); } catch(e) {}
+  return [];
+}
+function saveGeoLayers(arr) { localStorage.setItem(GEO_KEY, JSON.stringify(arr)); }
+
+function handleGeoUpload(file) {
+  if (!file) return;
+  const status = document.getElementById('geo-status');
+  if (!file.name.toLowerCase().endsWith('.zip')) {
+    status.style.color='var(--red-t)'; status.textContent='נדרש קובץ ZIP בלבד'; return;
+  }
+  status.style.color='var(--txt2)'; status.textContent='מעבד קובץ...';
+
+  // Use JSZip from CDN
+  const script = document.getElementById('jszip-script');
+  if (!script) {
+    const s = document.createElement('script');
+    s.id = 'jszip-script';
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = () => processZip(file);
+    document.head.appendChild(s);
+  } else {
+    processZip(file);
+  }
+}
+
+function processZip(file) {
+  const status = document.getElementById('geo-status');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    JSZip.loadAsync(e.target.result).then(function(zip) {
+      const supported = ['.shp','.geojson','.json','.kml','.gpx','.gml'];
+      const layers = [];
+      const promises = [];
+      zip.forEach(function(relPath, zipEntry) {
+        const ext = relPath.toLowerCase().slice(relPath.lastIndexOf('.'));
+        if (supported.includes(ext) && !zipEntry.dir) {
+          const p = zipEntry.async('string').then(function(text) {
+            let featureCount = '?';
+            let geomType = '—';
+            try {
+              if (ext === '.geojson' || ext === '.json') {
+                const gj = JSON.parse(text);
+                if (gj.features) { featureCount = gj.features.length; geomType = gj.features[0]?.geometry?.type || '—'; }
+                else if (gj.type === 'Feature') { featureCount = 1; geomType = gj.geometry?.type || '—'; }
+              } else if (ext === '.kml') {
+                const matches = text.match(/<(Placemark|placemark)/g);
+                featureCount = matches ? matches.length : '?';
+                geomType = 'KML';
+              } else if (ext === '.gpx') {
+                const wpt = (text.match(/<wpt/g)||[]).length;
+                const trk = (text.match(/<trk/g)||[]).length;
+                featureCount = wpt + trk;
+                geomType = 'GPX';
+              } else if (ext === '.shp') {
+                featureCount = '(SHP)';
+                geomType = 'Shapefile';
+              }
+            } catch(e2) {}
+            layers.push({ id: Date.now() + Math.random(), name: relPath.split('/').pop(), ext, featureCount, geomType, size: zipEntry._data ? zipEntry._data.uncompressedSize : 0 });
+          }).catch(()=>{
+            layers.push({ id: Date.now() + Math.random(), name: relPath.split('/').pop(), ext, featureCount:'?', geomType:'—', size:0 });
+          });
+          promises.push(p);
+        }
+      });
+      Promise.all(promises).then(function() {
+        if (!layers.length) {
+          status.style.color='var(--amb-t)'; status.textContent='לא נמצאו שכבות גיאוגרפיות ב-ZIP';
+          return;
+        }
+        const existing = getGeoLayers();
+        const merged = [...existing, ...layers];
+        saveGeoLayers(merged);
+        status.style.color='var(--grn-t)'; status.textContent='✓ נטענו '+layers.length+' שכבות בהצלחה';
+        document.getElementById('geo-file-input').value = '';
+        renderGeoLayers();
+        setTimeout(()=>status.textContent='',3000);
+      });
+    }).catch(function() {
+      status.style.color='var(--red-t)'; status.textContent='שגיאה בקריאת קובץ ZIP';
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderGeoLayers() {
+  const layers = getGeoLayers();
+  const sec = document.getElementById('geo-layers-section');
+  const list = document.getElementById('geo-layers-list');
+  const count = document.getElementById('geo-layer-count');
+  if (!layers.length) { sec.style.display='none'; return; }
+  sec.style.display='';
+  count.textContent = layers.length + ' שכבות';
+  list.innerHTML = layers.map(l =>
+    '<div class="geo-layer-item">'
+    +'<i class="ti ti-'+getGeoIcon(l.ext)+'" style="font-size:16px;color:var(--pur);margin-left:8px;"></i>'
+    +'<span class="g-name">'+escHtml(l.name)+'</span>'
+    +'<span class="g-type">'+l.geomType+'</span>'
+    +'<span style="font-size:11px;color:var(--txt3);white-space:nowrap;">'+l.featureCount+' פיצ'</span>'
+    +'<button class="btn-sm" style="margin-right:6px;" onclick="showGeoDetail(''+l.id+'')" title="פרטים"><i class="ti ti-info-circle"></i></button>'
+    +'<button class="btn-sm btn-danger" onclick="removeGeoLayer(''+l.id+'')" title="הסר"><i class="ti ti-x"></i></button>'
+    +'</div>'
+  ).join('');
+}
+
+function getGeoIcon(ext) {
+  if (ext==='.shp') return 'polygon';
+  if (ext==='.kml') return 'map-pin';
+  if (ext==='.gpx') return 'route';
+  return 'brackets-contain-end';
+}
+
+function showGeoDetail(id) {
+  const layer = getGeoLayers().find(l => String(l.id) === String(id));
+  const sec = document.getElementById('geo-detail-section');
+  const content = document.getElementById('geo-detail-content');
+  if (!layer) return;
+  sec.style.display='';
+  content.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+    +'<div><span style="color:var(--txt3);">שם:</span> <strong>'+escHtml(layer.name)+'</strong></div>'
+    +'<div><span style="color:var(--txt3);">סוג:</span> '+layer.ext+'</div>'
+    +'<div><span style="color:var(--txt3);">גיאומטריה:</span> '+layer.geomType+'</div>'
+    +'<div><span style="color:var(--txt3);">פיצ׳רים:</span> '+layer.featureCount+'</div>'
+    +(layer.size?'<div><span style="color:var(--txt3);">גודל:</span> '+(layer.size/1024).toFixed(1)+' KB</div>':'')
+    +'</div>';
+  sec.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function removeGeoLayer(id) {
+  saveGeoLayers(getGeoLayers().filter(l => String(l.id) !== String(id)));
+  renderGeoLayers();
+  document.getElementById('geo-detail-section').style.display='none';
+}
+
+function clearGeoLayers() {
+  if (!confirm('לנקות את כל השכבות?')) return;
+  saveGeoLayers([]);
+  renderGeoLayers();
+  document.getElementById('geo-detail-section').style.display='none';
+}
+
+// Drag & drop on geo zone
+window.addEventListener('DOMContentLoaded', function() {
+  const drop = document.getElementById('geo-drop');
+  if (!drop) return;
+  drop.addEventListener('dragover', e=>{e.preventDefault();drop.classList.add('drag-over');});
+  drop.addEventListener('dragleave', ()=>drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e=>{e.preventDefault();drop.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)handleGeoUpload(f);});
+});
 
 // =================== INIT ===================
 renderHistory();
