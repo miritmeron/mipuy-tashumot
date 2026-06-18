@@ -478,18 +478,36 @@ body{padding:1rem;}
 
 <div class="section">
   <div class="sec-title"><i class="ti ti-lock"></i> כניסת מנהל מערכת</div>
-  <div id="admin-lock">
+
+  <!-- הרשמה ראשונית -->
+  <div id="admin-register" class="hidden">
     <div class="admin-lock">
-      <div style="font-size:13px;color:var(--txt2);margin-bottom:1rem;">הזן סיסמת מנהל לגישה לפרמטרי החישוב</div>
+      <div style="font-size:16px;font-weight:500;margin-bottom:6px;">הגדרת מנהל ראשונית</div>
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:1.25rem;">ברוך הבא! זו ההגדרה הראשונה של מנהל המערכת.<br>הגדר שם ובחר סיסמה לכניסה בעתיד.</div>
+      <div style="text-align:right;max-width:260px;margin:0 auto;">
+        <div class="field"><label>שם מנהל</label><input type="text" id="reg-name" placeholder="שם מלא" style="width:100%;"/></div>
+        <div class="field"><label>בחר סיסמה</label><input type="password" id="reg-pwd1" placeholder="סיסמה (לפחות 4 תווים)" style="width:100%;" onkeydown="if(event.key==='Enter')document.getElementById('reg-pwd2').focus()"/></div>
+        <div class="field"><label>אימות סיסמה</label><input type="password" id="reg-pwd2" placeholder="חזור על הסיסמה" style="width:100%;" onkeydown="if(event.key==='Enter')adminRegister()"/></div>
+      </div>
+      <button class="btn-primary" style="width:220px;margin:0 auto;" onclick="adminRegister()"><i class="ti ti-user-plus"></i> צור חשבון מנהל</button>
+      <div id="reg-err" style="font-size:12px;color:var(--red-t);margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- כניסה רגילה -->
+  <div id="admin-lock" class="hidden">
+    <div class="admin-lock">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px;" id="admin-welcome-name"></div>
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:1rem;">הזן סיסמה לגישה לפרמטרי החישוב</div>
       <input type="password" id="admin-pwd" placeholder="סיסמה" onkeydown="if(event.key==='Enter')adminLogin()"/>
-      <button class="btn-primary" style="width:200px;margin:0 auto;" onclick="adminLogin()">כניסה</button>
+      <button class="btn-primary" style="width:200px;margin:0 auto;" onclick="adminLogin()"><i class="ti ti-login"></i> כניסה</button>
       <div id="admin-err" style="font-size:12px;color:var(--red-t);margin-top:8px;"></div>
     </div>
   </div>
 
   <div id="admin-panel" class="hidden">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-      <div style="font-size:13px;color:var(--grn-t);"><i class="ti ti-check"></i> מחובר כמנהל</div>
+      <div style="font-size:13px;color:var(--grn-t);"><i class="ti ti-check"></i> מחובר: <span id="admin-name-display"></span></div>
       <button class="btn-sm" onclick="adminLogout()">התנתק</button>
     </div>
 
@@ -580,7 +598,7 @@ const DEFAULT_PARAMS = {
   gcpArchive:4, gcpPer:2.5, contours:3, parcels:2, print:4,
   completion:1.5, coord:6, field:4, plani:0.7, update:0.6, spec:3, fmt:2
 };
-const ADMIN_PWD_KEY = 'mipui_admin_pwd';
+const ADMIN_META_KEY_OLD = 'mipui_admin_pwd'; // legacy, unused
 const PARAMS_KEY = 'mipui_params_v1';
 const HIST_KEY = 'mipui_hist_v2';
 const HIST_LIMIT = 300;
@@ -612,7 +630,7 @@ function showTab(name, el) {
   el.classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
   if(name==='hist') renderHistory();
-  if(name==='admin') loadAdminPanel();
+  if(name==='admin') { showAdminScreen(); if(adminLoggedIn) loadAdminPanel(); }
 }
 
 // =================== UNIT ===================
@@ -996,24 +1014,72 @@ function exportCSV(){
 }
 
 // =================== ADMIN ===================
-let adminLoggedIn=false;
-function adminLogin(){
-  const pwd=document.getElementById('admin-pwd').value;
-  if(pwd===getAdminPwd()){
-    adminLoggedIn=true;
+const ADMIN_META_KEY = 'mipui_admin_meta';
+let adminLoggedIn = false;
+
+function getAdminMeta() {
+  try { const r = localStorage.getItem(ADMIN_META_KEY); if(r) return JSON.parse(r); } catch(e) {}
+  return null;
+}
+function getAdminPwd() {
+  const m = getAdminMeta(); return m ? m.pwd : null;
+}
+
+function showAdminScreen() {
+  const meta = getAdminMeta();
+  if (!meta) {
+    // first time — show registration
+    document.getElementById('admin-register').classList.remove('hidden');
     document.getElementById('admin-lock').classList.add('hidden');
-    document.getElementById('admin-panel').classList.remove('hidden');
-    loadAdminPanel();
+    document.getElementById('admin-panel').classList.add('hidden');
   } else {
-    document.getElementById('admin-err').textContent='סיסמה שגויה';
-    setTimeout(()=>document.getElementById('admin-err').textContent='',2000);
+    // returning admin — show login
+    document.getElementById('admin-register').classList.add('hidden');
+    document.getElementById('admin-lock').classList.remove('hidden');
+    document.getElementById('admin-panel').classList.add('hidden');
+    document.getElementById('admin-welcome-name').textContent = 'שלום, ' + meta.name;
   }
 }
-function adminLogout(){
-  adminLoggedIn=false;
+
+function adminRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const p1 = document.getElementById('reg-pwd1').value;
+  const p2 = document.getElementById('reg-pwd2').value;
+  const err = document.getElementById('reg-err');
+  if (!name) { err.textContent = 'נא להזין שם מנהל'; return; }
+  if (p1.length < 4) { err.textContent = 'הסיסמה חייבת להכיל לפחות 4 תווים'; return; }
+  if (p1 !== p2) { err.textContent = 'הסיסמאות אינן תואמות'; return; }
+  localStorage.setItem(ADMIN_META_KEY, JSON.stringify({ name, pwd: p1 }));
+  err.textContent = '';
+  adminLoggedIn = true;
+  document.getElementById('admin-register').classList.add('hidden');
+  document.getElementById('admin-panel').classList.remove('hidden');
+  document.getElementById('admin-name-display').textContent = name;
+  loadAdminPanel();
+}
+
+function adminLogin() {
+  const pwd = document.getElementById('admin-pwd').value;
+  const meta = getAdminMeta();
+  if (meta && pwd === meta.pwd) {
+    adminLoggedIn = true;
+    document.getElementById('admin-lock').classList.add('hidden');
+    document.getElementById('admin-panel').classList.remove('hidden');
+    document.getElementById('admin-name-display').textContent = meta.name;
+    document.getElementById('admin-pwd').value = '';
+    loadAdminPanel();
+  } else {
+    const err = document.getElementById('admin-err');
+    err.textContent = 'סיסמה שגויה';
+    setTimeout(() => err.textContent = '', 2000);
+  }
+}
+
+function adminLogout() {
+  adminLoggedIn = false;
   document.getElementById('admin-lock').classList.remove('hidden');
   document.getElementById('admin-panel').classList.add('hidden');
-  document.getElementById('admin-pwd').value='';
+  document.getElementById('admin-pwd').value = '';
 }
 function loadAdminPanel(){
   if(!adminLoggedIn)return;
@@ -1056,8 +1122,11 @@ function changePwd(){
   const p1=document.getElementById('new-pwd1').value,p2=document.getElementById('new-pwd2').value;
   const msg=document.getElementById('pwd-msg');
   if(!p1){msg.style.color='var(--red-t)';msg.textContent='הכנס סיסמה חדשה';return;}
+  if(p1.length<4){msg.style.color='var(--red-t)';msg.textContent='סיסמה חייבת להכיל לפחות 4 תווים';return;}
   if(p1!==p2){msg.style.color='var(--red-t)';msg.textContent='הסיסמאות אינן תואמות';return;}
-  localStorage.setItem(ADMIN_PWD_KEY,p1);
+  const meta=getAdminMeta()||{name:''};
+  meta.pwd=p1;
+  localStorage.setItem(ADMIN_META_KEY,JSON.stringify(meta));
   msg.style.color='var(--grn-t)';msg.textContent='✓ הסיסמה עודכנה';
   document.getElementById('new-pwd1').value='';document.getElementById('new-pwd2').value='';
   setTimeout(()=>msg.textContent='',2000);
@@ -1066,6 +1135,7 @@ function changePwd(){
 // =================== INIT ===================
 renderHistory();
 updateAINote();
+showAdminScreen();
 const aoiArea=localStorage.getItem('aoi_send_area');
 if(aoiArea){
   document.getElementById('area-val').value=parseFloat(aoiArea).toFixed(4);
