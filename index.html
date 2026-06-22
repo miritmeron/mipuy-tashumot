@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>מחשבון תשומות מיפוי</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/tabler-icons.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#fff;--bg2:#f5f4f1;--bg3:#ebe9e4;
+  --txt:#1a1a18;--txt2:#6b6a66;--txt3:#9a9893;
+  --brd:rgba(0,0,0,.08);--brd2:rgba(0,0,0,.16);
+  --pur:#534AB7;--pur-l:#EEEDFE;--pur-d:#3C3489;
+  --grn:#1D9E75;--grn-l:#EAF3DE;--grn-t:#3B6D11;
+  --red:#E24B4A;--red-l:#FCEBEB;--red-t:#A32D2D;
+  --amb-l:#FAEEDA;--amb-t:#854F0B;
+  --rmd:8px;--rlg:12px;
+  --font:'Heebo',system-ui,-apple-system,Arial,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c;--bg2:#282825;--bg3:#121211;
+  --txt:#f0efec;--txt2:#b0aea8;--txt3:#7d7b76;
+  --brd:rgba(255,255,255,.08);--brd2:rgba(255,255,255,.16);
+  --pur-l:#2a2660;--grn-l:#0a3020;--grn-t:#97C459;
+  --red-l:#3a1010;--red-t:#F09595;--amb-l:#3a2000;--amb-t:#FAC775;
+}}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:var(--font);background:var(--bg3);color:var(--txt);}
+body{padding:1rem;}
+.page{max-width:680px;margin:0 auto;}
+
+.tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--bg2);border-radius:var(--rlg);padding:4px;}
+.tab{flex:1;padding:10px 6px;font-size:13px;font-weight:600;border:.5px solid var(--brd);background:var(--bg);cursor:pointer;border-radius:var(--rmd);color:var(--txt);display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;}
+.tab.active{background:var(--pur);color:#fff;border-color:var(--pur);box-shadow:0 2px 8px rgba(83,74,183,.35);}
+.tab:not(.active):hover{background:var(--pur-l);color:var(--pur-d);border-color:var(--pur);}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+
+.sec{background:var(--bg);border:.5px solid var(--brd);border-radius:var(--rlg);padding:1rem;margin-bottom:.875rem;}
+.sec-title{font-size:14px;font-weight:600;margin-bottom:.875rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.field{margin-bottom:.75rem;}
+.field label{display:block;font-size:13px;color:var(--txt2);margin-bottom:4px;}
+.field input,.field select,.field textarea{width:100%;font-size:14px;padding:8px 10px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);font-family:var(--font);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--pur);box-shadow:0 0 0 2px rgba(83,74,183,.1);}
+.field textarea{resize:vertical;min-height:52px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:440px){.row2{grid-template-columns:1fr;}}
+
+.chip{display:inline-flex;align-items:center;padding:5px 11px;border:.5px solid var(--brd2);border-radius:20px;cursor:pointer;font-size:13px;color:var(--txt2);background:var(--bg);user-select:none;transition:all .15s;}
+.chip.active,.chip-grp .chip.active{background:var(--pur);border-color:var(--pur);color:#fff;}
+.chip-grp{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+.rb{padding:6px 13px;border:.5px solid var(--brd2);border-radius:20px;cursor:pointer;font-size:13px;color:var(--txt2);background:var(--bg);user-select:none;transition:all .15s;}
+.rb.active{background:var(--pur);border-color:var(--pur);color:#fff;}
+.ig{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+
+.t-row{border-bottom:.5px solid var(--brd);padding:7px 0;}
+.t-row:last-child{border-bottom:none;}
+.t-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px;}
+.t-name{font-size:13px;color:var(--txt2);flex:1;}
+.t-pct{width:62px;font-size:13px;text-align:center;padding:5px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);}
+.t-comp{font-size:12px;color:var(--txt3);}
+.bar-wrap{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-top:10px;}
+.bar{height:8px;border-radius:4px;transition:width .2s;}
+.sum-ln{font-size:13px;margin-top:7px;display:flex;align-items:center;gap:8px;}
+
+/* ===== BUTTONS — upgraded ===== */
+.btn-p{
+  width:100%;padding:13px;font-size:15px;font-weight:700;
+  background:linear-gradient(135deg,var(--pur) 0%,#6B5FD4 100%);
+  color:#fff;border:none;border-radius:var(--rmd);cursor:pointer;margin-top:.5rem;
+  box-shadow:0 4px 14px rgba(83,74,183,.4);
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(83,74,183,.5);}
+.btn-p:active{transform:translateY(0);box-shadow:0 2px 8px rgba(83,74,183,.3);}
+
+.btn-s{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 14px;font-size:13px;font-weight:500;border-radius:var(--rmd);cursor:pointer;
+  border:1px solid var(--brd2);background:var(--bg);color:var(--txt);
+  transition:all .15s;
+}
+.btn-s:hover{background:var(--pur-l);border-color:var(--pur);color:var(--pur-d);}
+
+.btn-d{background:var(--red-l);color:var(--red-t);border-color:var(--red);}
+.btn-d:hover{background:var(--red);color:#fff;border-color:var(--red);}
+
+.btn-sm{
+  padding:5px 12px;font-size:12px;font-weight:500;
+  border:1px solid var(--brd2);border-radius:20px;cursor:pointer;
+  background:var(--bg);color:var(--txt2);transition:all .15s;
+}
+.btn-sm:hover{background:var(--pur-l);border-color:var(--pur);color:var(--pur-d);}
+
+.srow{display:flex;gap:7px;margin-top:.75rem;flex-wrap:wrap;}
+.srow .btn-s{flex:1;min-width:90px;}
+
+.res{background:var(--bg2);border:.5px solid var(--brd);border-radius:var(--rlg);padding:1rem;margin-top:.875rem;}
+.mets{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:1rem;}
+@media(max-width:500px){.mets{grid-template-columns:1fr 1fr;}}
+.mc{background:var(--bg);border-radius:var(--rmd);padding:.875rem;text-align:center;}
+.mc.full{grid-column:1/-1;}
+.ml{font-size:12px;color:var(--txt2);margin-bottom:4px;}
+.mv{font-size:22px;font-weight:700;color:var(--pur);}
+.ms{font-size:11px;color:var(--txt3);margin-top:2px;}
+.bdr{display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--brd);gap:8px;font-size:13px;}
+.bdr:last-child{border:none;font-weight:600;}
+.bdr>span:first-child{color:var(--txt2);}
+.cb{display:inline-block;padding:3px 11px;border-radius:20px;font-size:12px;font-weight:600;}
+.cl{background:var(--grn-l);color:var(--grn-t);}
+.cm{background:var(--amb-l);color:var(--amb-t);}
+.ch{background:var(--red-l);color:var(--red-t);}
+
+.undo-bar{background:var(--amb-l);color:var(--amb-t);border-radius:var(--rmd);padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:.875rem;}
+
+.htbl{width:100%;border-collapse:collapse;font-size:12px;}
+.htbl th{text-align:right;padding:6px 8px;font-size:11px;color:var(--txt2);font-weight:600;border-bottom:.5px solid var(--brd2);white-space:nowrap;}
+.htbl td{padding:6px 8px;border-bottom:.5px solid var(--brd);vertical-align:middle;}
+.htbl tr:last-child td{border-bottom:none;}
+.htbl tr:hover td{background:var(--pur-l);}
+
+.adm-lock{text-align:center;padding:2rem 1rem;}
+.adm-lock input{font-size:14px;padding:9px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);width:240px;display:block;margin:0 auto .75rem;font-family:var(--font);}
+.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:500px){.adm-grid{grid-template-columns:1fr;}}
+.adm-f{margin-bottom:.875rem;}
+.adm-f label{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--txt2);margin-bottom:4px;}
+.adm-f input[type=number]{width:110px;font-size:14px;padding:7px 10px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);font-family:var(--font);}
+.help-btn{width:16px;height:16px;border-radius:50%;background:var(--pur-l);color:var(--pur);border:none;cursor:pointer;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;transition:all .15s;}
+.help-btn:hover{background:var(--pur);color:#fff;}
+.help-modal-bg{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.help-modal{background:var(--bg);border-radius:var(--rlg);padding:1.25rem;max-width:360px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.help-modal-title{font-size:15px;font-weight:700;color:var(--pur);margin-bottom:.5rem;display:flex;align-items:center;gap:6px;}
+.help-modal-body{font-size:13px;color:var(--txt2);line-height:1.7;}
+.help-modal-ex{background:var(--bg2);border-radius:var(--rmd);padding:8px 10px;font-size:12px;margin-top:.5rem;color:var(--txt3);border-right:3px solid var(--pur);}
+.help-modal-close{margin-top:.875rem;width:100%;}
+
+.user-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--brd);font-size:13px;}
+.user-row:last-child{border-bottom:none;}
+.badge-you{background:var(--pur-l);color:var(--pur-d);font-size:11px;padding:2px 7px;border-radius:20px;margin-right:6px;}
+.chip-inf{display:inline-block;background:var(--pur-l);color:var(--pur-d);border-radius:20px;padding:2px 9px;font-size:11px;}
+.hidden{display:none!important;}
+.foot{text-align:center;font-size:11px;color:var(--txt3);margin-top:1.5rem;padding-bottom:1rem;line-height:1.8;}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#13141F;--bg2:#1C1D2E;--bg3:#0D0E18;
+  --txt:#E8EAF6;--txt2:#9FA3C0;--txt3:#6B6F8A;
+  --brd:rgba(255,255,255,.07);--brd2:rgba(255,255,255,.13);
+  --pur-l:#1E1B4B;--grn-l:#022C22;--grn-t:#34D399;
+  --red-l:#1F0909;--red-t:#FCA5A5;--amb-l:#1C1400;--amb-t:#FCD34D;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.3);
+  --shadow:0 4px 16px rgba(0,0,0,.3);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.4);
+}}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:var(--font);background:var(--bg3);color:var(--txt);line-height:1.5;}
+body{padding:0;}
+
+/* ===== HEADER ===== */
+.app-header{
+  background:linear-gradient(135deg,var(--pur-d) 0%,var(--pur) 50%,var(--pur-m) 100%);
+  padding:1.5rem 1.5rem 3.5rem;
+  position:relative;overflow:hidden;
+}
+.app-header::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.header-content{position:relative;z-index:1;display:flex;align-items:flex-start;gap:12px;}
+.header-icon{width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:var(--rlg);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;backdrop-filter:blur(8px);}
+.header-text h1{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px;margin-bottom:2px;}
+.header-text p{font-size:13px;color:rgba(255,255,255,.75);font-weight:400;}
+
+/* ===== MAIN CARD ===== */
+.page{max-width:680px;margin:0 auto;padding:1rem;}
+
+
+
+/* ===== FIELDS ===== */
+.field{margin-bottom:.875rem;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:5px;letter-spacing:.3px;text-transform:uppercase;}
+.field input,.field select,.field textarea{
+  width:100%;font-size:14px;padding:10px 12px;border-radius:var(--rmd);
+  border:1.5px solid var(--brd2);background:var(--bg);color:var(--txt);
+  transition:border-color .15s,box-shadow .15s;font-family:var(--font);
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--pur);
+  box-shadow:0 0 0 3px rgba(79,70,229,.12);
+}
+.field textarea{resize:vertical;min-height:52px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:440px){.row2{grid-template-columns:1fr;}}
+
+/* ===== CHIPS / RADIO BUTTONS ===== */
+.chip{display:inline-flex;align-items:center;padding:6px 14px;border:1.5px solid var(--brd2);border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;color:var(--txt2);background:var(--bg);user-select:none;transition:all .15s;}
+.chip.active,.chip-grp .chip.active{background:var(--pur);border-color:var(--pur);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3);}
+.chip-grp{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+.rb{padding:7px 14px;border:1.5px solid var(--brd2);border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;color:var(--txt2);background:var(--bg);user-select:none;transition:all .15s;}
+.rb.active{background:var(--pur);border-color:var(--pur);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3);}
+.rb:hover:not(.active),.chip:hover:not(.active){border-color:var(--pur);color:var(--pur);}
+.ig{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+
+/* ===== TERRAIN ROWS ===== */
+.t-row{border-bottom:.5px solid var(--brd);padding:8px 0;}
+.t-row:last-child{border-bottom:none;}
+.t-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px;}
+.t-name{font-size:13px;color:var(--txt2);flex:1;font-weight:500;}
+.t-pct{width:66px;font-size:13px;text-align:center;padding:6px;border-radius:var(--rmd);border:1.5px solid var(--brd2);background:var(--bg);color:var(--txt);transition:border-color .15s;}
+.t-pct:focus{outline:none;border-color:var(--pur);}
+.t-comp{font-size:11px;color:var(--txt3);}
+.bar-wrap{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:10px;}
+.bar{height:6px;border-radius:3px;transition:width .3s cubic-bezier(.4,0,.2,1);}
+.sum-ln{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:8px;}
+
+/* ===== MAIN BUTTON ===== */
+.btn-p{
+  width:100%;padding:14px;font-size:15px;font-weight:700;letter-spacing:.3px;
+  background:linear-gradient(135deg,var(--pur),var(--pur-m));
+  color:#fff;border:none;border-radius:var(--rmd);cursor:pointer;
+  margin-top:.75rem;box-shadow:0 4px 16px rgba(79,70,229,.35);
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,70,229,.45);}
+.btn-p:active{transform:translateY(0);}
+.btn-s{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:600;border-radius:var(--rmd);cursor:pointer;border:1.5px solid var(--brd2);background:var(--bg);color:var(--txt);transition:all .15s;}
+.btn-s:hover{background:var(--bg2);border-color:var(--pur-m);color:var(--pur);}
+.btn-d{background:var(--red-l);color:var(--red-t);border-color:var(--red);}
+.btn-sm{padding:5px 12px;font-size:12px;font-weight:600;border:1.5px solid var(--brd2);border-radius:20px;cursor:pointer;background:var(--bg);color:var(--txt2);transition:all .15s;}
+.btn-sm:hover{background:var(--bg2);}
+.srow{display:flex;gap:8px;margin-top:.875rem;flex-wrap:wrap;}
+.srow .btn-s{flex:1;min-width:90px;}
+
+/* ===== RESULTS ===== */
+.res{
+  background:var(--bg);border:.5px solid var(--brd);
+  border-radius:var(--rlg);padding:1.5rem;margin-top:1rem;
+  box-shadow:var(--shadow-lg);
+  border-top:3px solid var(--pur);
+}
+.mets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.mc{
+  background:var(--bg2);border-radius:var(--rmd);padding:1rem;text-align:center;
+  border:.5px solid var(--brd);position:relative;overflow:hidden;
+}
+.mc::after{content:'';position:absolute;inset:-50%;background:radial-gradient(circle at 50% 0,rgba(79,70,229,.06),transparent 70%);pointer-events:none;}
+.mc.full{grid-column:1/-1;}
+.ml{font-size:11px;font-weight:700;color:var(--txt3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.mv{font-size:28px;font-weight:800;color:var(--pur);letter-spacing:-1px;}
+.ms{font-size:11px;color:var(--txt3);margin-top:2px;}
+.bdr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--brd);gap:8px;font-size:13px;}
+.bdr:last-child{border:none;font-weight:700;color:var(--txt);}
+.bdr>span:first-child{color:var(--txt2);}
+.cb{display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+.cl{background:var(--grn-l);color:var(--grn-t);}
+.cm{background:var(--amb-l);color:var(--amb-t);}
+.ch{background:var(--red-l);color:var(--red-t);}
+
+/* ===== UNDO BAR ===== */
+.undo-bar{background:var(--amb-l);color:var(--amb-t);border-radius:var(--rmd);padding:10px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:1rem;border:.5px solid rgba(245,158,11,.2);}
+
+/* ===== HISTORY TABLE ===== */
+.htbl{width:100%;border-collapse:collapse;font-size:12px;}
+.htbl th{text-align:right;padding:8px 10px;font-size:11px;font-weight:700;color:var(--txt3);border-bottom:1.5px solid var(--brd2);white-space:nowrap;text-transform:uppercase;letter-spacing:.3px;}
+.htbl td{padding:8px 10px;border-bottom:.5px solid var(--brd);vertical-align:middle;}
+.htbl tr:last-child td{border-bottom:none;}
+.htbl tr:hover td{background:var(--pur-l);}
+
+/* ===== ADMIN ===== */
+.adm-lock{text-align:center;padding:2.5rem 1rem;}
+.adm-lock input{font-size:14px;padding:10px 14px;border-radius:var(--rmd);border:1.5px solid var(--brd2);background:var(--bg);color:var(--txt);width:260px;display:block;margin:0 auto .875rem;font-family:var(--font);}
+.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:500px){.adm-grid{grid-template-columns:1fr;}}
+.adm-f{margin-bottom:.875rem;}
+.adm-f label{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
+.adm-f input[type=number]{width:120px;font-size:14px;padding:8px 12px;border-radius:var(--rmd);border:1.5px solid var(--brd2);background:var(--bg);color:var(--txt);font-family:var(--font);transition:border-color .15s;}
+.adm-f input[type=number]:focus{outline:none;border-color:var(--pur);}
+.help-btn{width:17px;height:17px;border-radius:50%;background:var(--pur-l);color:var(--pur);border:none;cursor:pointer;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.help-btn:hover{background:var(--pur);color:#fff;transform:scale(1.1);}
+.help-modal-bg{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.help-modal{background:var(--bg);border-radius:var(--rxl);padding:1.5rem;max-width:380px;width:90%;box-shadow:var(--shadow-lg);}
+.help-modal-title{font-size:16px;font-weight:700;color:var(--pur);margin-bottom:.625rem;display:flex;align-items:center;gap:8px;}
+.help-modal-body{font-size:13px;color:var(--txt2);line-height:1.75;}
+.help-modal-ex{background:var(--bg2);border-radius:var(--rmd);padding:10px 12px;font-size:12px;margin-top:.625rem;color:var(--txt3);border-right:3px solid var(--pur);}
+.help-modal-close{margin-top:1rem;width:100%;}
+
+.user-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--brd);font-size:13px;}
+.user-row:last-child{border-bottom:none;}
+.badge-you{background:var(--pur-l);color:var(--pur);font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-right:6px;}
+
+.chip-inf{display:inline-block;background:var(--pur-l);color:var(--pur);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;}
+.hidden{display:none!important;}
+.foot{text-align:center;font-size:11px;color:var(--txt3);margin-top:2rem;padding-bottom:1.5rem;line-height:2;}
+
+/* ===== AI BADGE ===== */
+#ai-badge{
+  background:linear-gradient(135deg,#7C3AED,#4F46E5);
+  color:#fff;border-radius:var(--rmd);padding:8px 12px;
+  font-size:12px;margin-bottom:12px;display:flex;align-items:center;gap:6px;
+  box-shadow:0 2px 8px rgba(124,58,237,.3);
+}
+
+/* ===== SECTION LINK ===== */
+.sec-link{font-size:12px;color:var(--pur);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-top:4px;}
+.sec-link:hover{text-decoration:underline;}
+/* F1 Help */
+.adm-f{position:relative;}
+.adm-f label{display:flex;align-items:center;gap:4px;}
+.help-btn{width:15px;height:15px;border-radius:50%;background:var(--pur-l);color:var(--pur-d);border:none;cursor:pointer;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.help-btn:hover{background:var(--pur);color:#fff;}
+.help-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);}
+.help-modal-box{background:var(--bg);border-radius:var(--rlg);padding:1.25rem;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);direction:rtl;}
+.help-modal-title{font-size:15px;font-weight:500;margin-bottom:.625rem;color:var(--pur);}
+.help-modal-body{font-size:13px;color:var(--txt2);line-height:1.7;}
+.help-modal-example{background:var(--bg2);border-radius:var(--rmd);padding:8px 10px;font-size:12px;margin-top:.625rem;color:var(--txt3);}
+.help-modal-close{margin-top:.875rem;width:100%;}
+</style>
+</head>
+<body>
+<div class="page">
+<div style="margin-bottom:1rem;">
+  <div style="font-size:19px;font-weight:700;margin-bottom:3px;">🗺️ מחשבון תשומות מיפוי פוטוגרמטרי</div>
+  <div style="font-size:13px;color:var(--txt2);">כלי פנימי לאנשי מכירות — הערכת שעות עבודה</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('calc',this)"><i class="ti ti-calculator"></i> חישוב תשומות</button>
+  <button class="tab" onclick="showTab('hist',this)"><i class="ti ti-history"></i> היסטוריה</button>
+  <button class="tab" onclick="showTab('admin',this)"><i class="ti ti-settings"></i> הגדרות מנהל</button>
+</div>
+
+<!-- ======== CALC ======== -->
+<div id="tab-calc" class="tab-pane active">
+
+<div id="undo-bar" class="undo-bar hidden">
+  <span><i class="ti ti-rotate-left"></i> החישוב נוקה — <span id="undo-sec">30</span> שניות לשחזור</span>
+  <button class="btn-sm" onclick="undoReset()">שחזר</button>
+</div>
+
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-user"></i> פרטי פרויקט</div>
+  <div class="row2">
+    <div class="field"><label>שם לקוח</label><input type="text" id="f-client" placeholder="שם הלקוח"/></div>
+    <div class="field"><label>חברה</label><input type="text" id="f-company" placeholder="שם החברה"/></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>שם האתר / פרויקט</label><input type="text" id="f-site" placeholder="לדוגמה: נמל חיפה, שכונה X"/></div>
+    <div class="field"><label>שם התוצר</label>
+      <select id="f-product-sel" onchange="onProductSel()" style="font-family:var(--font);">
+        <option value="">-- בחר תוצר --</option>
+        <optgroup label="מיפוי פוטוגרמטרי">
+          <option value="מיפוי מטיסה 1:500 [MP001]">MP001 — מיפוי מטיסה 1:500</option>
+          <option value="מיפוי מנגנטיבים קיימים 1:1000 [MP004]">MP004 — מיפוי מנגנטיבים קיימים 1:1000</option>
+          <option value="מיפוי מטיסה 1:1250 [MP005]">MP005 — מיפוי מטיסה 1:1250</option>
+          <option value="מיפוי מטיסה 1:2500 [MP007]">MP007 — מיפוי מטיסה 1:2500</option>
+          <option value="מיפוי מטיסה 1:5000 [MP009]">MP009 — מיפוי מטיסה 1:5000</option>
+          <option value="מיפוי מטיסה 1:10000 [MP011]">MP011 — מיפוי מטיסה 1:10000</option>
+        </optgroup>
+        <optgroup label="אחר">
+          <option value="custom">✏️ הזנה ידנית...</option>
+        </optgroup>
+      </select>
+      <input type="text" id="f-product" placeholder="שם התוצר" style="display:none;margin-top:6px;"/>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field">
+      <label>תאריך חישוב</label>
+      <input type="date" id="f-date" style="width:180px;"/>
+    </div>
+    <div class="field">
+      <label>לוח עסקים <span style="font-size:10px;color:var(--txt3);">(ימי עבודה)</span></label>
+      <select id="f-country" style="font-size:13px;padding:7px 10px;border-radius:var(--rmd);border:.5px solid var(--brd2);background:var(--bg);color:var(--txt);font-family:var(--font);">
+        <optgroup label="מזרח התיכון">
+          <option value="IL" selected>🇮🇱 ישראל (א׳–ה׳)</option>
+          <option value="AE">🇦🇪 אמירויות (א׳–ה׳)</option>
+          <option value="SA">🇸🇦 סעודיה (א׳–ה׳)</option>
+          <option value="AE">🇯🇴 ירדן (א׳–ה׳)</option>
+          <option value="AE">🇰🇼 כווית (א׳–ה׳)</option>
+          <option value="AE">🇶🇦 קטאר (א׳–ה׳)</option>
+          <option value="AE">🇧🇭 בחריין (א׳–ה׳)</option>
+          <option value="AE">🇴🇲 עומאן (א׳–ה׳)</option>
+          <option value="EU">🇹🇷 טורקיה (ב׳–ו׳)</option>
+        </optgroup>
+        <optgroup label="אירופה">
+          <option value="EU">🇬🇧 בריטניה (ב׳–ו׳)</option>
+          <option value="EU">🇩🇪 גרמניה (ב׳–ו׳)</option>
+          <option value="EU">🇫🇷 צרפת (ב׳–ו׳)</option>
+          <option value="EU">🇮🇹 איטליה (ב׳–ו׳)</option>
+          <option value="EU">🇪🇸 ספרד (ב׳–ו׳)</option>
+          <option value="EU">🇵🇱 פולין (ב׳–ו׳)</option>
+          <option value="EU">🇳🇱 הולנד (ב׳–ו׳)</option>
+          <option value="EU">🇧🇪 בלגיה (ב׳–ו׳)</option>
+          <option value="EU">🇸🇪 שוודיה (ב׳–ו׳)</option>
+          <option value="EU">🇳🇴 נורווגיה (ב׳–ו׳)</option>
+          <option value="EU">🇩🇰 דנמרק (ב׳–ו׳)</option>
+          <option value="EU">🇫🇮 פינלנד (ב׳–ו׳)</option>
+          <option value="EU">🇦🇹 אוסטריה (ב׳–ו׳)</option>
+          <option value="EU">🇨🇭 שווייץ (ב׳–ו׳)</option>
+          <option value="EU">🇵🇹 פורטוגל (ב׳–ו׳)</option>
+          <option value="EU">🇬🇷 יוון (ב׳–ו׳)</option>
+          <option value="EU">🇨🇿 צ׳כיה (ב׳–ו׳)</option>
+          <option value="EU">🇭🇺 הונגריה (ב׳–ו׳)</option>
+          <option value="EU">🇷🇴 רומניה (ב׳–ו׳)</option>
+          <option value="EU">🇧🇬 בולגריה (ב׳–ו׳)</option>
+          <option value="EU">🇭🇷 קרואטיה (ב׳–ו׳)</option>
+          <option value="EU">🇷🇸 סרביה (ב׳–ו׳)</option>
+          <option value="EU">🇽🇰 קוסובו (ב׳–ו׳)</option>
+          <option value="EU">🇦🇱 אלבניה (ב׳–ו׳)</option>
+          <option value="EU">🇧🇦 בוסניה (ב׳–ו׳)</option>
+          <option value="EU">🇸🇮 סלובניה (ב׳–ו׳)</option>
+          <option value="EU">🇲🇰 מקדוניה (ב׳–ו׳)</option>
+          <option value="EU">🇱🇹 ליטא (ב׳–ו׳)</option>
+          <option value="EU">🇱🇻 לטביה (ב׳–ו׳)</option>
+          <option value="EU">🇪🇪 אסטוניה (ב׳–ו׳)</option>
+          <option value="EU">🇮🇪 אירלנד (ב׳–ו׳)</option>
+          <option value="EU">🇺🇦 אוקראינה (ב׳–ו׳)</option>
+        </optgroup>
+        <optgroup label="קווקז ואסיה התיכונה">
+          <option value="EU">🇬🇪 גיאורגיה (ב׳–ו׳)</option>
+          <option value="EU">🇦🇿 אזרבייג׳ן (ב׳–ו׳)</option>
+          <option value="EU">🇦🇲 ארמניה (ב׳–ו׳)</option>
+          <option value="EU">🇰🇿 קזחסטן (ב׳–ו׳)</option>
+          <option value="EU">🇺🇿 אוזבקיסטן (ב׳–ו׳)</option>
+        </optgroup>
+        <optgroup label="אפריקה">
+          <option value="EU">🇬🇭 גאנה (ב׳–ו׳)</option>
+          <option value="EU">🇳🇬 ניגריה (ב׳–ו׳)</option>
+          <option value="EU">🇰🇪 קניה (ב׳–ו׳)</option>
+          <option value="EU">🇿🇦 דרום אפריקה (ב׳–ו׳)</option>
+          <option value="EU">🇪🇹 אתיופיה (ב׳–ו׳)</option>
+          <option value="EU">🇷🇼 רואנדה (ב׳–ו׳)</option>
+          <option value="EU">🇹🇿 טנזניה (ב׳–ו׳)</option>
+        </optgroup>
+        <optgroup label="אסיה">
+          <option value="IN">🇮🇳 הודו (ב׳–ו׳)</option>
+          <option value="EU">🇨🇳 סין (ב׳–ו׳)</option>
+          <option value="EU">🇯🇵 יפן (ב׳–ו׳)</option>
+          <option value="EU">🇸🇬 סינגפור (ב׳–ו׳)</option>
+          <option value="EU">🇻🇳 וייטנאם (ב׳–ו׳)</option>
+          <option value="EU">🇵🇭 פיליפינים (ב׳–ו׳)</option>
+        </optgroup>
+        <optgroup label="אמריקה ואוקיאניה">
+          <option value="US">🇺🇸 ארה״ב (ב׳–ו׳)</option>
+          <option value="US">🇨🇦 קנדה (ב׳–ו׳)</option>
+          <option value="EU">🇧🇷 ברזיל (ב׳–ו׳)</option>
+          <option value="US">🇦🇺 אוסטרליה (ב׳–ו׳)</option>
+          <option value="US">🇳🇿 ניו זילנד (ב׳–ו׳)</option>
+        </optgroup>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-map"></i> שטח פרויקט</div>
+  <div class="row2">
+    <div class="field"><label>גודל שטח</label><input type="number" id="f-area" placeholder="ערך" min="0" step="0.1" oninput="onArea()"/></div>
+    <div class="field"><label>יחידה</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb active" onclick="setUnit('sqkm',this)">קמ״ר</span>
+        <span class="rb" onclick="setUnit('dunam',this)">דונם</span>
+      </div>
+    </div>
+  </div>
+  <div id="area-disp" style="font-size:13px;color:var(--txt2);"></div>
+  <div style="margin-top:10px;">
+    <a href="mapa-aoi.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,var(--pur),#6B5FD4);color:#fff;border-radius:var(--rmd);text-decoration:none;font-size:13px;font-weight:600;box-shadow:0 4px 14px rgba(83,74,183,.4);transition:all .2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 18px rgba(83,74,183,.5)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(83,74,183,.4)'">
+      <i class="ti ti-map-2" style="font-size:16px;"></i>
+      תיחום פוליגון AOI על מפה
+      <i class="ti ti-arrow-left" style="font-size:14px;"></i>
+    </a>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title" style="justify-content:space-between;">
+    <span><i class="ti ti-trees"></i> אופי שטח</span>
+    <span class="chip-inf">הזן אחוז — סה״כ 100%</span>
+  </div>
+  <div id="terrain-rows">
+    <div class="t-row" data-k="open"><div class="t-top"><span class="t-name">שטח פתוח / טבעי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="onTerrain()"/></div><div class="t-comp" id="tc-open">—</div></div>
+    <div class="t-row" data-k="agri"><div class="t-top"><span class="t-name">אזור חקלאי / כפרי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="onTerrain()"/></div><div class="t-comp" id="tc-agri">—</div></div>
+    <div class="t-row" data-k="mountain"><div class="t-top"><span class="t-name">אזור הררי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="onTerrain()"/></div><div class="t-comp" id="tc-mountain">—</div></div>
+    <div class="t-row" data-k="urban-light"><div class="t-top"><span class="t-name">אורבני מרווח</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="onTerrain()"/></div><div class="t-comp" id="tc-urban-light">—</div></div>
+    <div class="t-row" data-k="urban-dense"><div class="t-top"><span class="t-name">אורבני צפוף</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="onTerrain()"/></div><div class="t-comp" id="tc-urban-dense">—</div></div>
+    <div class="t-row" data-k="industrial"><div class="t-top"><span class="t-name">תעשייתי / מסחרי</span><input class="t-pct" type="number" min="0" max="100" step="1" placeholder="%" oninput="onTerrain()"/></div><div class="t-comp" id="tc-industrial">—</div></div>
+  </div>
+  <div class="bar-wrap"><div class="bar" id="t-bar" style="width:0%;background:var(--pur);"></div></div>
+  <div class="sum-ln"><span style="font-size:12px;color:var(--txt3);">סה״כ:</span><span id="t-sum-pct" style="font-weight:500;">0%</span><span id="t-sum-st"></span></div>
+</div>
+
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-ruler"></i> קנ״מ ומאפייני מיפוי</div>
+  <div class="row2">
+    <div class="field"><label>קנ״מ מיפוי</label>
+      <select id="f-scale">
+        <option value="">בחר קנ״מ</option>
+        <option value="250">1:250</option><option value="500">1:500</option>
+        <option value="1000">1:1,000</option><option value="2500">1:2,500</option>
+        <option value="5000">1:5,000</option><option value="10000">1:10,000</option>
+      </select>
+    </div>
+    <div class="field"><label>סוג מיפוי</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb active" onclick="setS('mapType','new',this)">חדש</span>
+        <span class="rb" onclick="setS('mapType','update',this)">עדכון</span>
+      </div>
+    </div>
+  </div>
+  <div class="field hidden" id="update-yr"><label>שנת מיפוי קודם</label><input type="number" id="f-upd-yr" placeholder="2018" min="1980" max="2030" style="width:130px;"/></div>
+  <div class="field"><label>היקף מיפוי</label>
+    <div class="ig">
+      <span class="rb active" onclick="setS('mapScope','full',this)">מלא</span>
+      <span class="rb" onclick="setS('mapScope','plani',this)">פלנימטריה בלבד</span>
+    </div>
+  </div>
+  <div class="field"><label>רשת קואורדינטות (בחירה מרובה)</label>
+    <div class="chip-grp">
+      <span class="chip" onclick="togChip(this,'grid')" data-v="israel">רשת ישראל חדשה</span>
+      <span class="chip" onclick="togChip(this,'grid')" data-v="utm">UTM</span>
+      <span class="chip" onclick="togChip(this,'grid')" data-v="internal">פנימית/תפעולית</span>
+      <span class="chip" onclick="togChip(this,'grid')" data-v="none">ללא רשת</span>
+      <span class="chip" onclick="togChip(this,'grid')" data-v="other">אחר</span>
+    </div>
+    <textarea class="hidden" id="ta-grid" placeholder="פרט רשת אחרת..." style="margin-top:7px;width:100%;"></textarea>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-map-pin"></i> נקודות בקרה (GCP)</div>
+  <div class="ig">
+    <span class="rb active" onclick="setGCP('none',this)">לא נדרש</span>
+    <span class="rb" onclick="setGCP('client',this)">יסופק ע״י הלקוח</span>
+    <span class="rb" onclick="setGCP('archive',this)">בדיקה בארכיון</span>
+    <span class="rb" onclick="setGCP('required',this)">נדרש לבצע</span>
+  </div>
+  <div class="row2 hidden" id="gcp-extra" style="margin-top:10px;">
+    <div class="field"><label>מספר נקודות</label><input type="number" id="f-gcp-cnt" placeholder="כמות" min="0" style="width:100px;"/></div>
+    <div class="field"><label>סוג נקודות</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb active" onclick="setS('gcpType','regular',this)">רגילות</span>
+        <span class="rb" onclick="setS('gcpType','mapi',this)">מאושרות מפ״י</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-puzzle"></i> תנאי עבודה</div>
+  <div class="row2">
+    <div class="field"><label>השלמות שטח</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb" onclick="setS('completion','yes',this)">כן</span>
+        <span class="rb active" onclick="setS('completion','no',this)">לא</span>
+      </div>
+    </div>
+    <div class="field"><label>נדרש תיאום</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb" onclick="setS('coordination','yes',this)">כן</span>
+        <span class="rb active" onclick="setS('coordination','no',this)">לא</span>
+      </div>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>תיקוף מודד בשטח</label>
+      <div class="ig">
+        <span class="rb" onclick="setS('fieldCheck','yes',this)">כן</span>
+        <span class="rb active" onclick="setS('fieldCheck','no',this)">לא</span>
+      </div>
+    </div>
+    <div class="field">
+      <label><i class="ti ti-building-community" style="color:var(--pur);vertical-align:-2px;"></i> ביצוע קב"ל / חיצוני</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb active" onclick="setS('outsource','internal',this)">🏠 צוות מקומי</span>
+        <span class="rb" onclick="setS('outsource','partial',this)">🤝 חלקי</span>
+        <span class="rb" onclick="setS('outsource','full',this)">✈️ קב"ל מלא</span>
+      </div>
+      <div id="outsource-note" style="font-size:11px;color:var(--txt3);margin-top:4px;"></div>
+    </div>
+  </div>
+  <div class="field">
+    <label><i class="ti ti-robot" style="color:var(--pur);vertical-align:-2px;"></i> שימוש בכלי AI בתהליך</label>
+    <div class="ig" style="margin-top:4px;">
+      <span class="rb" onclick="setS('aiUsed','yes',this)">כן — מפחית תשומות</span>
+      <span class="rb active" onclick="setS('aiUsed','no',this)">לא</span>
+    </div>
+    <div id="ai-note" style="font-size:11px;color:var(--txt3);margin-top:4px;"></div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-file-description"></i> דרישות מסירה ופורמטים</div>
+  <div class="field"><label>מפרט הגשה (בחירה מרובה)</label>
+    <div class="chip-grp">
+      <span class="chip" onclick="togChip(this,'spec')" data-v="mapi">מפ״י</span>
+      <span class="chip" onclick="togChip(this,'spec')" data-v="827">827</span>
+      <span class="chip" onclick="togChip(this,'spec')" data-v="risui">רישוי זמין</span>
+      <span class="chip" onclick="togChip(this,'spec')" data-v="bn">BN</span>
+      <span class="chip" onclick="togChip(this,'spec')" data-v="electric">חברת חשמל</span>
+      <span class="chip" onclick="togChip(this,'spec')" data-v="mabat">מבא״ת</span>
+      <span class="chip" onclick="togChip(this,'spec')" data-v="other">אחר</span>
+    </div>
+    <textarea class="hidden" id="ta-spec" placeholder="פרט מפרט אחר..." style="margin-top:7px;width:100%;"></textarea>
+  </div>
+  <div class="field"><label>פורמט הגשה (בחירה מרובה)</label>
+    <div class="chip-grp">
+      <span class="chip" onclick="togChip(this,'fmt')" data-v="dwg">DWG</span>
+      <span class="chip" onclick="togChip(this,'fmt')" data-v="dxf">DXF</span>
+      <span class="chip" onclick="togChip(this,'fmt')" data-v="pdf">PDF</span>
+      <span class="chip" onclick="togChip(this,'fmt')" data-v="shp">SHP</span>
+      <span class="chip" onclick="togChip(this,'fmt')" data-v="gdb">GDB</span>
+      <span class="chip" onclick="togChip(this,'fmt')" data-v="jpg">JPG</span>
+      <span class="chip" onclick="togChip(this,'fmt')" data-v="other">אחר</span>
+    </div>
+    <textarea class="hidden" id="ta-fmt" placeholder="פרט פורמט אחר..." style="margin-top:7px;width:100%;"></textarea>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-layers"></i> תוצרים נוספים</div>
+  <div class="row2">
+    <div class="field"><label>הדפסת מפות</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb" onclick="setS('printing','yes',this)">כן</span>
+        <span class="rb active" onclick="setS('printing','no',this)">לא</span>
+      </div>
+    </div>
+    <div class="field"><label>קווי גובה</label>
+      <div class="ig" style="margin-top:4px;">
+        <span class="rb" onclick="setContours('yes',this)">כן</span>
+        <span class="rb active" onclick="setContours('no',this)">לא</span>
+      </div>
+    </div>
+  </div>
+  <div class="row2 hidden" id="contour-extra">
+    <div class="field"><label>אינטרוול קווי גובה (מ׳)</label><input type="number" id="f-interval" placeholder="0.5" min="0" step="0.1"/></div>
+    <div class="field"><label>GSD (ס״מ/פיקסל)</label><input type="number" id="f-gsd" placeholder="5" min="0" step="0.5"/></div>
+  </div>
+  <div class="field"><label>גושים וחלקות</label>
+    <div class="ig">
+      <span class="rb" onclick="setParcels('yes',this)">כן</span>
+      <span class="rb active" onclick="setParcels('no',this)">לא</span>
+    </div>
+  </div>
+  <div class="field hidden" id="parcel-src"><label>מקור גושים וחלקות</label>
+    <div class="ig" style="margin-top:4px;">
+      <span class="rb" onclick="setS('parcelSrc','existing',this)">שכבה קיימת</span>
+      <span class="rb" onclick="setS('parcelSrc','external',this)">קליטה חיצונית</span>
+      <span class="rb" onclick="setS('parcelSrc','unknown',this)">לא ידוע</span>
+      <span class="rb" onclick="setS('parcelSrc','other',this)">אחר</span>
+    </div>
+    <textarea class="hidden" id="ta-parcel" style="margin-top:7px;width:100%;" placeholder="פרט..."></textarea>
+  </div>
+  <div class="field"><label>DTM — צפיפות שריג</label>
+    <div class="ig">
+      <span class="rb active" onclick="setDtm('none',this)">ללא</span>
+      <span class="rb" onclick="setDtm('40x40',this)">40×40</span>
+      <span class="rb" onclick="setDtm('20x20',this)">20×20</span>
+      <span class="rb" onclick="setDtm('15x15',this)">15×15</span>
+      <span class="rb" onclick="setDtm('10x10',this)">10×10</span>
+      <span class="rb" onclick="setDtm('other',this)">אחר</span>
+    </div>
+    <textarea class="hidden" id="ta-dtm" style="margin-top:7px;width:100%;" placeholder="פרט..."></textarea>
+  </div>
+</div>
+
+<button class="btn-p" onclick="doCalc()"><i class="ti ti-calculator"></i> חשב תשומות</button>
+
+<div class="res hidden" id="res-panel">
+  <div style="font-size:14px;font-weight:500;margin-bottom:.875rem;">
+    <i class="ti ti-chart-bar"></i> תוצאות הערכת תשומות
+    <div id="res-client" style="font-size:13px;color:var(--txt2);font-weight:400;margin-top:3px;"></div>
+  </div>
+  <div id="ai-badge" class="hidden" style="background:var(--pur-l);color:var(--pur-d);border-radius:var(--rmd);padding:6px 10px;font-size:12px;margin-bottom:10px;"><i class="ti ti-robot"></i> כולל הנחת AI — <span id="ai-pct-lbl"></span>% הפחתה</div>
+  <div class="mets" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+    <div class="mc"><div class="ml">⏱ שעות עבודה</div><div class="mv" id="r-hours">—</div><div class="ms">שעות</div></div>
+    <div class="mc"><div class="ml">📅 ימי עסקים</div><div class="mv" id="r-days">—</div><div class="ms" id="r-days-sub" style="font-size:10px;line-height:1.5;">ניכוי שבתות וחגים</div></div>
+    <div class="mc"><div class="ml">🌙 משמרות</div><div class="mv" id="r-shifts">—</div><div class="ms" id="r-shifts-sub" style="font-size:10px;line-height:1.5;">לפי שע׳/משמרת</div></div>
+    <div class="mc"><div class="ml">📊 מורכבות</div><div id="r-complex" style="margin-top:6px;">—</div></div>
+  </div>
+  <div style="font-size:13px;font-weight:500;margin-bottom:8px;">פירוט מקדמים</div>
+  <div class="bdr"><span>שטח (קמ״ר)</span><span id="bd-area">—</span></div>
+  <div class="bdr"><span>מקדם אופי שטח</span><span id="bd-tf">—</span></div>
+  <div class="bdr"><span>מקדם קנ״מ</span><span id="bd-sf">—</span></div>
+  <div class="bdr"><span>מקדם היקף/עדכון</span><span id="bd-scope">—</span></div>
+  <div class="bdr"><span>תוספת GCP</span><span id="bd-gcp">—</span></div>
+  <div class="bdr"><span>תוספת תוצרים</span><span id="bd-prod">—</span></div>
+  <div class="bdr"><span>תוספת פורמטים</span><span id="bd-fmt">—</span></div>
+  <div class="bdr"><span>תוספת מפרטים</span><span id="bd-spec">—</span></div>
+  <div class="bdr"><span>הנחת AI</span><span id="bd-ai">—</span></div>
+  <div class="bdr"><span>סה״כ שעות</span><span id="bd-total">—</span></div>
+  <div class="srow">
+    <a class="btn-s" id="wa-btn" href="#" target="_blank"><i class="ti ti-brand-whatsapp"></i> וואטסאפ</a>
+    <button class="btn-s" onclick="doOutlook()"><i class="ti ti-mail"></i> Outlook</button>
+    <button class="btn-s" id="copy-btn" onclick="doCopy()"><i class="ti ti-copy"></i> העתק</button>
+  </div>
+  <div class="srow" style="margin-top:6px;">
+    <button class="btn-s" onclick="doExportPNG()"><i class="ti ti-photo"></i> ייצוא PNG עם מפה</button>
+    <button class="btn-s" onclick="doExportPDF()"><i class="ti ti-file-type-pdf"></i> ייצוא PDF</button>
+  </div>
+  <button class="btn-s btn-d" style="width:100%;margin-top:8px;" onclick="newCalc()"><i class="ti ti-plus"></i> חישוב חדש</button>
+</div>
+</div><!-- /tab-calc -->
+
+<!-- ======== HISTORY ======== -->
+<div id="tab-hist" class="tab-pane">
+<div class="sec">
+  <div class="sec-title" style="justify-content:space-between;">
+    <span><i class="ti ti-history"></i> היסטוריית חישובים</span>
+    <span class="chip-inf" id="h-count">0 רשומות</span>
+  </div>
+  <div id="h-stats" class="hidden">
+    <div class="mets" style="margin-bottom:.75rem;">
+      <div class="mc"><div class="ml">סה״כ שטח</div><div class="mv" id="hs-area">—</div><div class="ms">קמ״ר</div></div>
+      <div class="mc"><div class="ml">ממוצע שע׳/קמ״ר</div><div class="mv" id="hs-rate">—</div><div class="ms">שעות</div></div>
+      <div class="mc"><div class="ml">קנ״מ נפוץ</div><div class="mv" id="hs-scale">—</div><div class="ms" id="hs-scale-s"></div></div>
+      <div class="mc"><div class="ml">אופי שטח שכיח</div><div class="mv" id="hs-terrain">—</div><div class="ms"></div></div>
+    </div>
+  </div>
+  <div class="row2 hidden" id="h-filters" style="margin-bottom:.75rem;">
+    <div class="field"><label>סינון קנ״מ</label>
+      <select id="f-hscale" onchange="renderHist()">
+        <option value="">הכל</option>
+        <option value="250">1:250</option><option value="500">1:500</option>
+        <option value="1000">1:1,000</option><option value="2500">1:2,500</option>
+        <option value="5000">1:5,000</option><option value="10000">1:10,000</option>
+      </select>
+    </div>
+    <div class="field"><label>סינון מורכבות</label>
+      <select id="f-hcomplex" onchange="renderHist()">
+        <option value="">הכל</option>
+        <option>נמוכה</option><option>בינונית</option><option>גבוהה</option>
+      </select>
+    </div>
+  </div>
+  <div id="h-empty" style="font-size:13px;color:var(--txt3);text-align:center;padding:1.5rem 0;">עדיין לא בוצעו חישובים — כל חישוב נשמר אוטומטית.</div>
+  <div id="h-tbl-wrap" class="hidden" style="overflow-x:auto;">
+    <table class="htbl">
+      <thead><tr>
+        <th>תאריך חישוב</th><th>לקוח / חברה</th><th>אתר</th><th>תוצר</th>
+        <th>שטח קמ״ר</th><th>קנ״מ</th><th>שעות</th><th>מורכבות</th><th></th>
+      </tr></thead>
+      <tbody id="h-tbody"></tbody>
+    </table>
+  </div>
+  <div class="srow hidden" id="h-actions">
+    <button class="btn-s" onclick="exportCSV()"><i class="ti ti-download"></i> ייצוא CSV</button>
+    <button class="btn-s btn-d" onclick="clearHist()"><i class="ti ti-trash"></i> נקה הכל</button>
+  </div>
+</div>
+</div><!-- /tab-hist -->
+
+<!-- ======== ADMIN ======== -->
+<div id="tab-admin" class="tab-pane">
+<div class="sec">
+  <div class="sec-title"><i class="ti ti-shield-lock"></i> כניסה למערכת</div>
+
+  <!-- מסך כניסה -->
+  <div id="adm-login" class="hidden">
+    <div class="adm-lock">
+      <div style="font-size:22px;margin-bottom:8px;">🔐</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">כניסה למערכת</div>
+      <div style="font-size:12px;color:var(--txt2);margin-bottom:1.25rem;">הזן שם משתמש וסיסמה</div>
+      <div style="max-width:260px;margin:0 auto;text-align:right;">
+        <div class="field"><label>שם משתמש</label>
+          <input type="text" id="adm-user" placeholder="שם משתמש" style="width:100%;" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('adm-pwd').focus()"/>
+        </div>
+        <div class="field"><label>סיסמה</label>
+          <input type="password" id="adm-pwd" placeholder="סיסמה" style="width:100%;" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+        </div>
+      </div>
+      <button class="btn-p" style="width:200px;margin:0 auto;" onclick="doLogin()"><i class="ti ti-login"></i> כניסה</button>
+      <div id="adm-err" style="font-size:12px;color:var(--red-t);margin-top:10px;min-height:18px;"></div>
+    </div>
+  </div>
+
+  <!-- פאנל מחובר -->
+  <div id="adm-panel" class="hidden">
+    <!-- שורת סטטוס -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:10px 14px;background:var(--grn-l);border-radius:var(--rmd);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="adm-role-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;"></span>
+        <span style="font-size:13px;color:var(--grn-t);">מחובר: <strong id="adm-name-lbl"></strong></span>
+      </div>
+      <button class="btn-sm" onclick="doLogout()"><i class="ti ti-logout"></i> התנתק</button>
+    </div>
+
+    <!-- ניהול משתמשים (מנהל מערכת ומעלה) -->
+    <div class="sec" style="margin-bottom:.875rem;" id="adm-users-sec">
+      <div class="sec-title"><i class="ti ti-users"></i> ניהול משתמשים</div>
+      <div id="adm-users-list" style="margin-bottom:.875rem;"></div>
+      <div style="border-top:.5px solid var(--brd);padding-top:.875rem;" id="adm-add-user-sec">
+        <div style="font-size:13px;font-weight:600;margin-bottom:.625rem;">הוספת משתמש חדש</div>
+        <div class="row2">
+          <div class="field"><label>שם מלא</label><input type="text" id="new-adm-name" placeholder="לדוגמה: מירית מרון"/></div>
+          <div class="field"><label>שם כניסה <span style="font-size:10px;color:var(--txt3);">(לכניסה למערכת)</span></label><input type="text" id="new-adm-user" placeholder="לדוגמה: mirit" dir="ltr" autocomplete="off"/></div>
+        </div>
+        <div class="field">
+          <label>סיסמה ראשונית <span style="font-size:10px;color:var(--txt3);">(המשתמש יוכל לשנות לאחר הכניסה)</span></label>
+          <input type="password" id="new-adm-pwd" placeholder="לפחות 4 תווים"/>
+        </div>
+        <div class="field">
+          <label>תפקיד</label>
+          <div class="ig" id="new-adm-role-grp">
+            <span class="rb active" data-role="sales">📊 מנהל מכירות</span>
+            <span class="rb" data-role="admin" id="rb-admin-role">⚙️ מנהל מערכת</span>
+          </div>
+        </div>
+        <button class="btn-s" onclick="addAdmin()"><i class="ti ti-user-plus"></i> הוסף משתמש</button>
+        <div id="add-adm-msg" style="font-size:12px;margin-top:8px;min-height:18px;"></div>
+      </div>
+    </div>
+
+    <!-- שינוי סיסמה אישית -->
+    <div class="sec" style="margin-bottom:.875rem;">
+      <div class="sec-title"><i class="ti ti-key"></i> שינוי הסיסמה שלי</div>
+      <div class="row2">
+        <div class="field"><label>סיסמה חדשה</label><input type="password" id="chg-p1" placeholder="סיסמה חדשה"/></div>
+        <div class="field"><label>אימות</label><input type="password" id="chg-p2" placeholder="חזור על הסיסמה"/></div>
+      </div>
+      <button class="btn-s" onclick="changePwd()"><i class="ti ti-check"></i> שמור סיסמה</button>
+      <div id="pwd-msg" style="font-size:12px;margin-top:6px;min-height:18px;"></div>
+    </div>
+
+    <!-- פרמטרים (מנהל מערכת ומעלה בלבד) -->
+    <div id="adm-params-sec">
+      <div class="sec" style="margin-bottom:.875rem;">
+        <div class="sec-title"><i class="ti ti-sliders"></i> פרמטרי בסיס <span style="font-size:11px;color:var(--txt3);font-weight:400;">— לחץ ? לעזרה</span></div>
+        <div class="adm-grid">
+          <div class="adm-f"><label>מקדם קב"ל חלקי <button class="help-btn" onclick="showHelp('outsourcePartial')">?</button></label><input type="number" id="p-outsource-partial" min="1" max="2" step="0.05"/></div>
+          <div class="adm-f"><label>מקדם קב"ל מלא <button class="help-btn" onclick="showHelp('outsourceFull')">?</button></label><input type="number" id="p-outsource-full" min="1" max="2" step="0.05"/></div>
+          <div class="adm-f"><label>שעות בסיס לקמ״ר <button class="help-btn" onclick="showHelp('base')">?</button></label><input type="number" id="p-base" min="1" step="0.5"/></div>
+          <div class="adm-f"><label>שע׳ ביום עבודה <button class="help-btn" onclick="showHelp('hoursPerDay')">?</button></label><input type="number" id="p-hours-day" min="1" max="24" step="1"/></div>
+          <div class="adm-f"><label>שע׳ במשמרת <button class="help-btn" onclick="showHelp('hoursPerShift')">?</button></label><input type="number" id="p-hours-shift" min="1" max="24" step="1"/></div>
+          <div class="adm-f"><label>הנחת AI (%) <button class="help-btn" onclick="showHelp('ai')">?</button></label><input type="number" id="p-ai" min="0" max="50" step="1"/></div>
+          <div class="adm-f"><label>תוספת מבא״ת (%) <button class="help-btn" onclick="showHelp('mabat')">?</button></label><input type="number" id="p-mabat" min="0" max="100" step="1"/></div>
+          <div class="adm-f"><label>מקדם עדכון מיפוי <button class="help-btn" onclick="showHelp('update')">?</button></label><input type="number" id="p-update" min="0.1" max="1" step="0.05"/></div>
+          <div class="adm-f"><label>מקדם פלנימטריה <button class="help-btn" onclick="showHelp('plani')">?</button></label><input type="number" id="p-plani" min="0.1" max="1" step="0.05"/></div>
+          <div class="adm-f"><label>GCP ארכיון (שע׳) <button class="help-btn" onclick="showHelp('gcpArch')">?</button></label><input type="number" id="p-gcp-arch" min="0" step="0.5"/></div>
+          <div class="adm-f"><label>GCP לביצוע (שע׳/נק׳) <button class="help-btn" onclick="showHelp('gcpPer')">?</button></label><input type="number" id="p-gcp-per" min="0" step="0.1"/></div>
+          <div class="adm-f"><label>קווי גובה (שע׳/קמ״ר) <button class="help-btn" onclick="showHelp('cont')">?</button></label><input type="number" id="p-cont" min="0" step="0.1"/></div>
+          <div class="adm-f"><label>גושים וחלקות (שע׳/קמ״ר) <button class="help-btn" onclick="showHelp('parc')">?</button></label><input type="number" id="p-parc" min="0" step="0.1"/></div>
+          <div class="adm-f"><label>הדפסה (שע׳) <button class="help-btn" onclick="showHelp('print')">?</button></label><input type="number" id="p-print" min="0" step="0.5"/></div>
+          <div class="adm-f"><label>השלמות (שע׳/קמ״ר) <button class="help-btn" onclick="showHelp('comp')">?</button></label><input type="number" id="p-comp" min="0" step="0.1"/></div>
+          <div class="adm-f"><label>תיאום (שע׳) <button class="help-btn" onclick="showHelp('coord')">?</button></label><input type="number" id="p-coord" min="0" step="0.5"/></div>
+          <div class="adm-f"><label>תיקוף שטח (שע׳) <button class="help-btn" onclick="showHelp('field')">?</button></label><input type="number" id="p-field" min="0" step="0.5"/></div>
+          <div class="adm-f"><label>מפרט נוסף (שע׳) <button class="help-btn" onclick="showHelp('spec')">?</button></label><input type="number" id="p-spec" min="0" step="0.5"/></div>
+          <div class="adm-f"><label>פורמט נוסף (שע׳) <button class="help-btn" onclick="showHelp('fmt')">?</button></label><input type="number" id="p-fmt" min="0" step="0.5"/></div>
+        </div>
+      </div>
+      <div class="sec" style="margin-bottom:.875rem;">
+        <div class="sec-title"><i class="ti ti-trees"></i> מקדמי אופי שטח</div>
+        <div class="adm-grid">
+          <div class="adm-f"><label>פתוח / טבעי <button class="help-btn" onclick="showHelp('tf-open')">?</button></label><input type="number" id="tf-open" min="0.5" max="5" step="0.05"/></div>
+          <div class="adm-f"><label>חקלאי / כפרי <button class="help-btn" onclick="showHelp('tf-agri')">?</button></label><input type="number" id="tf-agri" min="0.5" max="5" step="0.05"/></div>
+          <div class="adm-f"><label>הררי <button class="help-btn" onclick="showHelp('tf-mountain')">?</button></label><input type="number" id="tf-mountain" min="0.5" max="5" step="0.05"/></div>
+          <div class="adm-f"><label>אורבני מרווח <button class="help-btn" onclick="showHelp('tf-urban-light')">?</button></label><input type="number" id="tf-urban-light" min="0.5" max="5" step="0.05"/></div>
+          <div class="adm-f"><label>אורבני צפוף <button class="help-btn" onclick="showHelp('tf-urban-dense')">?</button></label><input type="number" id="tf-urban-dense" min="0.5" max="5" step="0.05"/></div>
+          <div class="adm-f"><label>תעשייתי / מסחרי <button class="help-btn" onclick="showHelp('tf-industrial')">?</button></label><input type="number" id="tf-industrial" min="0.5" max="5" step="0.05"/></div>
+        </div>
+      </div>
+      <div class="sec" style="margin-bottom:.875rem;">
+        <div class="sec-title"><i class="ti ti-ruler"></i> מקדמי קנ״מ</div>
+        <div class="adm-grid">
+          <div class="adm-f"><label>1:250</label><input type="number" id="sf-250" min="0.1" max="10" step="0.05"/></div>
+          <div class="adm-f"><label>1:500</label><input type="number" id="sf-500" min="0.1" max="10" step="0.05"/></div>
+          <div class="adm-f"><label>1:1,000</label><input type="number" id="sf-1000" min="0.1" max="10" step="0.05"/></div>
+          <div class="adm-f"><label>1:2,500</label><input type="number" id="sf-2500" min="0.1" max="10" step="0.05"/></div>
+          <div class="adm-f"><label>1:5,000</label><input type="number" id="sf-5000" min="0.1" max="10" step="0.05"/></div>
+          <div class="adm-f"><label>1:10,000</label><input type="number" id="sf-10000" min="0.1" max="10" step="0.05"/></div>
+        </div>
+      </div>
+      <button class="btn-p" onclick="saveParams()"><i class="ti ti-device-floppy"></i> שמור את כל הפרמטרים</button>
+      <div id="save-msg" style="font-size:13px;text-align:center;margin-top:8px;min-height:20px;"></div>
+      <button class="btn-s" style="width:100%;margin-top:8px;" onclick="resetParams()"><i class="ti ti-refresh"></i> איפוס לברירת מחדל</button>
+    </div>
+  </div>
+</div>
+</div><!-- /tab-admin -->
+
+<!-- Help Modal -->
+<div id="help-modal-bg" class="help-modal-bg hidden" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal">
+    <div class="help-modal-title"><i class="ti ti-info-circle"></i> <span id="help-title"></span></div>
+    <div class="help-modal-body" id="help-body"></div>
+    <div class="help-modal-ex" id="help-ex" style="display:none;"></div>
+    <button class="btn-p help-modal-close" onclick="closeHelp()">סגור</button>
+  </div>
+</div> — לאנשי מכירות בלבד. הערכה בלבד, אינה מהווה הצעת מחיר.<br>היסטוריה נשמרת מקומית בדפדפן זה.</div>
+</div><!-- /page -->
+
+<script>
+const K_PARAMS='mipui_params_v2', K_HIST='mipui_hist_v2';
+
+const DEF={
+  base:12, ai:20, mabat:15, update:0.6, plani:0.7,
+  gcpArch:4, gcpPer:2.5, cont:3, parc:2, print:4,
+  comp:1.5, coord:6, field:4, spec:3, fmt:2,
+  hoursPerDay:8, hoursPerShift:8,
+  outsourcePartial:1.15, outsourceFull:1.35,
+  tf:{open:1.0,agri:1.1,mountain:1.4,'urban-light':1.3,'urban-dense':1.6,industrial:1.25},
+  sf:{'250':2.2,'500':1.8,'1000':1.4,'2500':1.1,'5000':0.85,'10000':0.7}
+};
+const SL={'250':'1:250','500':'1:500','1000':'1:1,000','2500':'1:2,500','5000':'1:5,000','10000':'1:10,000'};
+const TL={open:'פתוח',agri:'חקלאי',mountain:'הררי','urban-light':'אורבני מרווח','urban-dense':'אורבני צפוף',industrial:'תעשייתי'};
+
+function getP(){try{const r=localStorage.getItem(K_PARAMS);if(r)return JSON.parse(r);}catch(e){}return JSON.parse(JSON.stringify(DEF));}
+function setP(p){localStorage.setItem(K_PARAMS,JSON.stringify(p));}
+function getHist(){try{const r=localStorage.getItem(K_HIST);if(r)return JSON.parse(r);}catch(e){}return[];}
+function setHist(h){localStorage.setItem(K_HIST,JSON.stringify(h));}
+
+// ===== STATE =====
+const ST={
+  unit:'sqkm',gcp:'none',mapType:'new',mapScope:'full',gcpType:'regular',
+  completion:'no',coordination:'no',fieldCheck:'no',aiUsed:'no',outsource:'internal',
+  printing:'no',contours:'no',parcels:'no',parcelSrc:'',dtm:'none',
+  grids:[],specs:[],formats:[]
+};
+let undoSnap=null, undoTimer=null;
+
+// ===== TABS =====
+function showTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='hist') renderHist();
+  if(name==='admin') showAdminGate();
+}
+
+// ===== FORM HELPERS =====
+function setUnit(u,el){ST.unit=u;document.querySelectorAll('[onclick^="setUnit"]').forEach(e=>e.classList.remove('active'));el.classList.add('active');onArea();onTerrain();}
+function getSqkm(){const v=parseFloat(document.getElementById('f-area').value)||0;return ST.unit==='dunam'?v/1000:v;}
+function onProductSel(){
+  const sel=document.getElementById('f-product-sel');
+  const inp=document.getElementById('f-product');
+  if(sel.value==='custom'){
+    inp.style.display='';
+    inp.focus();
+    inp.value='';
+  } else {
+    inp.style.display='none';
+    inp.value=sel.value;
+  }
+}
+function getProduct(){
+  const sel=document.getElementById('f-product-sel');
+  const inp=document.getElementById('f-product');
+  return sel.value==='custom'||sel.value===''?inp.value:sel.value;
+}
+function onArea(){
+  const v=parseFloat(document.getElementById('f-area').value);
+  const d=document.getElementById('area-disp');
+  if(!isNaN(v)&&v>0) d.textContent=ST.unit==='dunam'?'= '+(v/1000).toFixed(3)+' קמ״ר':'= '+Math.round(v*1000)+' דונם';
+  else d.textContent='';
+  onTerrain();
+}
+function onTerrain(){
+  const sqkm=getSqkm();let tot=0;
+  document.querySelectorAll('#terrain-rows .t-row').forEach(row=>{
+    const k=row.dataset.k,pct=parseFloat(row.querySelector('input').value)||0;
+    tot+=pct;
+    const el=document.getElementById('tc-'+k);
+    if(sqkm>0&&pct>0){const s=(pct/100)*sqkm;el.textContent=s.toFixed(3)+' קמ״ר • '+Math.round(s*1000)+' דונם';}
+    else el.textContent='—';
+  });
+  const bar=document.getElementById('t-bar');
+  bar.style.width=Math.min(tot,100)+'%';
+  bar.style.background=tot>100?'var(--red)':tot===100?'var(--grn)':'var(--pur)';
+  const ps=document.getElementById('t-sum-pct'),ss=document.getElementById('t-sum-st');
+  ps.textContent=tot.toFixed(0)+'%';
+  if(tot===100){ps.style.color='var(--grn-t)';ss.innerHTML='<span style="color:var(--grn-t)"><i class="ti ti-check"></i> תקין</span>';}
+  else if(tot>100){ps.style.color='var(--red-t)';ss.innerHTML='<span style="color:var(--red-t)">חורג ב-'+(tot-100).toFixed(0)+'%</span>';}
+  else if(tot>0){ps.style.color='var(--txt)';ss.innerHTML='<span style="font-size:12px;color:var(--txt3);">נשאר '+(100-tot).toFixed(0)+'%</span>';}
+  else{ps.style.color='var(--txt3)';ss.textContent='';}
+}
+function setS(key,val,el){
+  ST[key]=val;
+  document.querySelectorAll('[onclick^="setS(\''+key+'\'"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  if(key==='mapType') document.getElementById('update-yr').classList.toggle('hidden',val!=='update');
+  if(key==='aiUsed') refreshAINote();
+  if(key==='outsource') refreshOutsourceNote();
+  const ta=document.getElementById('ta-'+key);
+  if(ta) ta.classList.toggle('hidden',val!=='other');
+  const ta2=document.getElementById('ta-'+key.replace('Src',''));
+  if(ta2&&key.endsWith('Src')) ta2.classList.toggle('hidden',val!=='other');
+}
+function togChip(el,grp){
+  el.classList.toggle('active');
+  const vals=[];
+  document.querySelectorAll('[onclick^="togChip(this,\''+grp+'\'"]').forEach(e=>{if(e.classList.contains('active'))vals.push(e.dataset.v);});
+  if(grp==='grid') ST.grids=vals;
+  else if(grp==='spec') ST.specs=vals;
+  else ST.formats=vals;
+  const ta=document.getElementById('ta-'+grp);
+  if(ta) ta.classList.toggle('hidden',!vals.includes('other'));
+}
+function setGCP(val,el){
+  ST.gcp=val;
+  document.querySelectorAll('[onclick^="setGCP"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('gcp-extra').classList.toggle('hidden',val==='none'||val==='client');
+}
+function setContours(val,el){
+  ST.contours=val;
+  document.querySelectorAll('[onclick^="setContours"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('contour-extra').classList.toggle('hidden',val==='no');
+}
+function setParcels(val,el){
+  ST.parcels=val;
+  document.querySelectorAll('[onclick^="setParcels"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('parcel-src').classList.toggle('hidden',val==='no');
+}
+function setDtm(val,el){
+  ST.dtm=val;
+  document.querySelectorAll('[onclick^="setDtm"]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ta-dtm').classList.toggle('hidden',val!=='other');
+}
+function refreshAINote(){
+  const p=getP();
+  document.getElementById('ai-note').textContent=ST.aiUsed==='yes'?'הנחה של '+p.ai+'% על סה״כ התשומות':'';
+}
+function refreshOutsourceNote(){
+  const p=getP();
+  const el=document.getElementById('outsource-note');
+  if(!el)return;
+  if(ST.outsource==='partial') el.textContent='תוספת '+(Math.round(((p.outsourcePartial||1.15)-1)*100))+'% — תיאום וניהול חלקי עם ספק חיצוני';
+  else if(ST.outsource==='full') el.textContent='תוספת '+(Math.round(((p.outsourceFull||1.35)-1)*100))+'% — ניהול, בקרה ותיאום מלא עם קב"ל חיצוני';
+  else el.textContent='';
+}
+
+// ===== CALCULATE =====
+function doCalc(){
+  const sqkm=getSqkm();
+  if(sqkm<=0){alert('נא להזין שטח פרויקט');return;}
+  const scale=document.getElementById('f-scale').value;
+  if(!scale){alert('נא לבחור קנ״מ מיפוי');return;}
+  const p=getP();
+
+  let tf=0,totPct=0;
+  const tDet={};
+  document.querySelectorAll('#terrain-rows .t-row').forEach(row=>{
+    const k=row.dataset.k,pct=parseFloat(row.querySelector('input').value)||0;
+    totPct+=pct;tf+=(pct/100)*(p.tf[k]||1);tDet[k]=pct;
+  });
+  if(totPct===0) tf=1;
+  const sf=p.sf[scale]||1;
+  const scopeF=ST.mapScope==='plani'?p.plani:1;
+  const updF=ST.mapType==='update'?p.update:1;
+  let base=sqkm*p.base*tf*sf*scopeF*updF;
+
+  let gcpAdd=0;
+  if(ST.gcp==='archive') gcpAdd=p.gcpArch;
+  else if(ST.gcp==='required'){const cnt=parseInt(document.getElementById('f-gcp-cnt').value)||5;gcpAdd=cnt*p.gcpPer;}
+
+  let prodAdd=0;
+  if(ST.contours==='yes') prodAdd+=sqkm*p.cont;
+  if(ST.printing==='yes') prodAdd+=p.print;
+  if(ST.parcels==='yes') prodAdd+=sqkm*p.parc;
+  const dtmM={'40x40':1,'20x20':1.5,'15x15':2,'10x10':3,'other':2};
+  if(ST.dtm!=='none') prodAdd+=sqkm*(dtmM[ST.dtm]||0);
+  if(ST.completion==='yes') prodAdd+=sqkm*p.comp;
+  if(ST.coordination==='yes') prodAdd+=p.coord;
+  if(ST.fieldCheck==='yes') prodAdd+=p.field;
+
+  let specAdd=0;
+  ST.specs.forEach(v=>{specAdd+=v==='mabat'?sqkm*(p.mabat/100)*p.base*sf:p.spec;});
+  const fmtAdd=Math.max(0,ST.formats.length-1)*p.fmt;
+
+  let total=base+gcpAdd+prodAdd+specAdd+fmtAdd;
+  let aiSave=0;
+  // Outsource factor
+  let outsourceF=1;
+  if(ST.outsource==='partial') outsourceF=p.outsourcePartial||1.15;
+  if(ST.outsource==='full') outsourceF=p.outsourceFull||1.35;
+  total *= outsourceF;
+
+  if(ST.aiUsed==='yes'){aiSave=total*(p.ai/100);total-=aiSave;}
+  const hours=Math.round(total);
+  const country=document.getElementById('f-country').value||'IL';
+  const hpd=p.hoursPerDay||8;
+  const hps=p.hoursPerShift||8;
+  const days=Math.ceil(hours/hpd);
+  const shifts=Math.ceil(hours/hps);
+  const bizInfo=calcBusinessDays(hours,hpd,country);
+  const complexity=hours>200?'גבוהה':hours>80?'בינונית':'נמוכה';
+  const cmap={נמוכה:'cl',בינונית:'cm',גבוהה:'ch'};
+
+  const client=document.getElementById('f-client').value;
+  const company=document.getElementById('f-company').value;
+  const site=document.getElementById('f-site').value;
+  const product=getProduct();
+  const calcDate=document.getElementById('f-date').value||new Date().toISOString().slice(0,10);
+
+  document.getElementById('r-hours').textContent=hours;
+  document.getElementById('r-days').textContent=bizInfo.bizDays;
+  document.getElementById('r-days-sub').textContent=
+    COUNTRY_NAMES[country]+' | ניכוי שבתות וחגים | מסיים: '+bizInfo.endDate;
+  document.getElementById('r-shifts').textContent=shifts;
+  document.getElementById('r-shifts-sub').textContent=
+    'חלוקה ל-'+(p.hoursPerShift||8)+' שע׳/משמרת (ללא תלות בלוח השנה)';
+  document.getElementById('r-complex').innerHTML='<span class="cb '+cmap[complexity]+'">'+complexity+'</span>';
+  document.getElementById('res-client').textContent=[client,company,site,product].filter(Boolean).join(' | ');
+  if(ST.aiUsed==='yes'){document.getElementById('ai-badge').classList.remove('hidden');document.getElementById('ai-pct-lbl').textContent=p.ai;}
+  else document.getElementById('ai-badge').classList.add('hidden');
+  document.getElementById('bd-area').textContent=sqkm.toFixed(3)+' קמ״ר';
+  document.getElementById('bd-tf').textContent=tf.toFixed(2);
+  document.getElementById('bd-sf').textContent=sf.toFixed(2)+' ('+SL[scale]+')';
+  document.getElementById('bd-scope').textContent=(scopeF*updF).toFixed(2);
+  document.getElementById('bd-gcp').textContent=gcpAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-prod').textContent=prodAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-fmt').textContent=fmtAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-spec').textContent=specAdd.toFixed(1)+' שע׳';
+  document.getElementById('bd-ai').textContent=aiSave>0?'-'+aiSave.toFixed(1)+' שע׳':'—';
+  document.getElementById('bd-total').innerHTML='<strong>'+hours+' שעות</strong>';
+
+  const txt=makeSummary(client,company,site,product,calcDate,sqkm,scale,hours,days,complexity);
+  document.getElementById('wa-btn').href='https://wa.me/?text='+encodeURIComponent(txt);
+  // Store text for Outlook/share
+  window._lastCalcTxt=txt;
+  window._lastCalcClient=client;
+  document.getElementById('res-panel').classList.remove('hidden');
+  document.getElementById('res-panel').scrollIntoView({behavior:'smooth',block:'start'});
+
+  addHist({timestamp:Date.now(),client,company,site,product,calcDate,areaSqkm:sqkm,scale,tDet,hours,days,complexity,aiUsed:ST.aiUsed});
+}
+
+function makeSummary(cl,co,site,product,calcDate,sqkm,scale,hours,days,complexity){
+  return 'הערכת תשומות מיפוי פוטוגרמטרי\n'
+    +(calcDate?'תאריך: '+calcDate+'\n':'')
+    +(cl?'לקוח: '+cl+(co?' | '+co:'')+'\n':'')
+    +(site?'אתר: '+site+'\n':'')
+    +(product?'תוצר: '+product+'\n':'')
+    +'שטח: '+sqkm.toFixed(3)+' קמ״ר\nקנ״מ: '+(SL[scale]||scale)
+    +'\nשעות: '+hours+' שע׳\nימים: '+days+'\nמורכבות: '+complexity;
+}
+function doGmail(){
+  const body=window._lastCalcTxt||'';
+  const sub=encodeURIComponent('הערכת תשומות מיפוי');
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&su='+sub+'&body='+encodeURIComponent(body),'_blank');
+}
+function doOutlook(){
+  const body=window._lastCalcTxt||'';
+  const sub=encodeURIComponent('הערכת תשומות מיפוי');
+  window.open('https://outlook.live.com/mail/0/deeplink/compose?subject='+sub+'&body='+encodeURIComponent(body),'_blank');
+}
+
+async function doExportPNG(){
+  if(!document.getElementById('r-hours').textContent||document.getElementById('r-hours').textContent==='—'){
+    alert('יש לחשב תשומות תחילה');return;
+  }
+  const hours=document.getElementById('r-hours').textContent;
+  const days=document.getElementById('r-days').textContent;
+  const shifts=document.getElementById('r-shifts').textContent;
+  const complex=document.getElementById('r-complex').textContent.replace(/<[^>]+>/g,'');
+  const client=document.getElementById('f-client').value||'—';
+  const site=document.getElementById('f-site').value||'—';
+  const product=document.getElementById('f-product').value||'—';
+  const area=document.getElementById('bd-area').textContent||'—';
+  const scale=document.getElementById('f-scale').value;
+  const calcDate=document.getElementById('f-date').value||new Date().toLocaleDateString('he-IL');
+  const now=new Date();
+  const timeStr=now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+  const dateStr=now.toLocaleDateString('he-IL');
+  const userName=currentAdmin?currentAdmin.name:'אנונימי';
+  const reportLine=`${dateStr} ${timeStr}  |  נוצר ע"י: ${userName}`;
+
+  // Get saved polygon from localStorage (set by mapa-aoi)
+  const aoiGJ = localStorage.getItem('aoi_last_geojson');
+  const hasMap = !!aoiGJ;
+
+  const W=1200, H=hasMap?780:560;
+  const PAD=24, MAP_H=280;
+  const headerH=80, projH=64;
+
+  // breakdown rows - 2 columns, right-to-left layout
+  const bdData=[
+    ['שטח',document.getElementById('bd-area').textContent],
+    ['מקדם אופי שטח',document.getElementById('bd-tf').textContent],
+    ['מקדם קנ״מ',document.getElementById('bd-sf').textContent],
+    ['מקדם היקף/עדכון',document.getElementById('bd-scope').textContent],
+    ['תוספת GCP',document.getElementById('bd-gcp').textContent],
+    ['תוספת תוצרים',document.getElementById('bd-prod').textContent],
+    ['תוספת מפרטים',document.getElementById('bd-spec').textContent],
+    ['הנחת AI',document.getElementById('bd-ai').textContent],
+    ['סה״כ שעות',document.getElementById('bd-total').textContent.replace(/<[^>]+>/g,'')],
+  ];
+  const colW=(W-PAD*2)/2-10;
+  const bdRows=bdData.map(([k,v],i)=>{
+    const col=i<5?0:1;
+    const row=i<5?i:i-5;
+    const detBaseY=hasMap?headerH+projH+MAP_H+PAD+110:headerH+projH+PAD+110;
+    const x=col===0?W-PAD-colW:PAD;
+    const y=detBaseY+row*28;
+    const isLast=k==='סה״כ שעות';
+    return `<rect x="${x-8}" y="${y-16}" width="${colW+8}" height="24" fill="${isLast?'#EEEDFE':'transparent'}" rx="4"/>
+<text x="${x+colW-4}" y="${y}" text-anchor="end" font-size="12" fill="${isLast?'#534AB7':'#666'}">${k}:</text>
+<text x="${x+8}" y="${y}" font-size="12" font-weight="${isLast?'bold':'500'}" fill="${isLast?'#534AB7':'#222'}">${v}</text>`;
+  }).join('');
+
+  const complexColor=complex.includes('גבוהה')?'#A32D2D':complex.includes('בינונית')?'#854F0B':'#3B6D11';
+  const complexBg=complex.includes('גבוהה')?'#FCEBEB':complex.includes('בינונית')?'#FAEEDA':'#EAF3DE';
+  const metricsY=hasMap?headerH+projH+MAP_H+PAD:headerH+projH+PAD;
+  const detailY=metricsY+110;
+  const detailH=H-detailY-40;
+  const footerY=H-30;
+
+  // metrics - 4 cards
+  const mW=(W-PAD*2-30)/4;
+  const metrics=[
+    {label:'שעות עבודה',val:hours,sub:'שעות',color:'#534AB7'},
+    {label:'ימי עבודה',val:days,sub:'ימים',color:'#534AB7'},
+    {label:'משמרות',val:shifts,sub:'משמרות',color:'#534AB7'},
+    {label:'מורכבות',val:complex,sub:'',color:complexColor,bg:complexBg},
+  ];
+  const svgMetrics=metrics.map((m,i)=>{
+    const mx=PAD+i*(mW+10);
+    const bg=m.bg||'white';
+    return `<rect x="${mx}" y="${metricsY}" width="${mW}" height="100" rx="8" fill="${bg}" stroke="#e8e8e8"/>
+<text x="${mx+mW/2}" y="${metricsY+22}" text-anchor="middle" font-size="12" fill="#888">${m.label}</text>
+<text x="${mx+mW/2}" y="${metricsY+68}" text-anchor="middle" font-size="44" font-weight="bold" fill="${m.color}">${m.val}</text>
+<text x="${mx+mW/2}" y="${metricsY+88}" text-anchor="middle" font-size="11" fill="#aaa">${m.sub}</text>`;
+  }).join('');
+
+  const svgBase=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+<defs><style>text{font-family:Arial,Helvetica,sans-serif;}</style></defs>
+<rect width="${W}" height="${H}" fill="#F5F4F1"/>
+<!-- Header -->
+<rect width="${W}" height="${headerH}" fill="#534AB7"/>
+<text x="${PAD}" y="28" font-size="20" font-weight="bold" fill="white">מחשבון תשומות מיפוי פוטוגרמטרי</text>
+<text x="${PAD}" y="50" font-size="11" fill="#EEEDFE">הערכת שעות עבודה — כלי פנימי לאנשי מכירות</text>
+<text x="${W-PAD}" y="24" text-anchor="end" font-size="11" fill="white">${dateStr}  ${timeStr}</text>
+<text x="${W-PAD}" y="40" text-anchor="end" font-size="11" fill="#EEEDFE">נוצר ע"י: ${userName}</text>
+<text x="${W-PAD}" y="56" text-anchor="end" font-size="10" fill="#C5C0F5">תאריך פרויקט: ${calcDate}</text>
+<!-- Project details -->
+<rect x="${PAD}" y="${headerH+8}" width="${W-PAD*2}" height="${projH-8}" rx="8" fill="white" stroke="#e8e8e8"/>
+<text x="${PAD+16}" y="${headerH+28}" font-size="12" font-weight="bold" fill="#534AB7">פרטי פרויקט</text>
+<text x="${PAD+16}" y="${headerH+46}" font-size="12" fill="#444">לקוח: ${client} | חברה: ${document.getElementById('f-company').value||'—'}</text>
+<text x="${PAD+16}" y="${headerH+62}" font-size="11" fill="#666">אתר: ${site}  |  תוצר: ${product}  |  שטח: ${area}  |  קנ״מ: ${scale?'1:'+parseInt(scale).toLocaleString():'—'}</text>`;
+
+  const svgDetail=`
+<!-- Breakdown -->
+<rect x="${PAD}" y="${detailY}" width="${W-PAD*2}" height="${detailH}" rx="8" fill="white" stroke="#e8e8e8"/>
+<text x="${W-PAD-16}" y="${detailY+22}" text-anchor="end" font-size="13" font-weight="bold" fill="#534AB7">פירוט מקדמים</text>
+<line x1="${PAD}" y1="${detailY+30}" x2="${W-PAD}" y2="${detailY+30}" stroke="#eee" stroke-width="1"/>
+${bdRows}`;
+
+  const svgFooter=`
+<rect y="${footerY}" width="${W}" height="30" fill="#534AB7"/>
+<text x="${W/2}" y="${footerY+19}" text-anchor="middle" font-size="11" fill="#EEEDFE">הערכה בלבד — אינה מהווה הצעת מחיר  |  מחשבון תשומות מיפוי פנימי</text>
+</svg>`;
+
+  if(hasMap){
+    try{
+      const gj=JSON.parse(aoiGJ);
+      let coords=[];
+      const getCoords=(g)=>{
+        if(g.type==='FeatureCollection') getCoords(g.features[0]);
+        else if(g.type==='Feature') getCoords(g.geometry);
+        else if(g.type==='Polygon') coords=g.coordinates[0];
+        else if(g.type==='MultiPolygon') coords=g.coordinates[0][0];
+      };
+      getCoords(gj);
+
+      const lats=coords.map(c=>c[1]), lons=coords.map(c=>c[0]);
+      const minLat=Math.min(...lats), maxLat=Math.max(...lats);
+      const minLon=Math.min(...lons), maxLon=Math.max(...lons);
+      const mapX=PAD, mapY=headerH+projH+8;
+      const mapW=W-PAD*2, mapH=MAP_H;
+      const padF=0.08; // padding fraction
+      const dLon=(maxLon-minLon)*padF||0.005;
+      const dLat=(maxLat-minLat)*padF||0.005;
+      const bLon=minLon-dLon, tLon=maxLon+dLon;
+      const bLat=minLat-dLat, tLat=maxLat+dLat;
+      const rX=tLon-bLon, rY=tLat-bLat;
+
+      // Correct mapping: lon→x (right=east), lat→y inverted (up=north)
+      function toSVGpt(lat,lon){
+        return{
+          x: mapX+(lon-bLon)/rX*mapW,
+          y: mapY+mapH-(lat-bLat)/rY*mapH  // invert Y: north=up
+        };
+      }
+
+      const pts=coords.map(c=>{
+        const p=toSVGpt(c[1],c[0]); // c[0]=lon, c[1]=lat
+        return p.x.toFixed(1)+','+p.y.toFixed(1);
+      }).join(' ');
+
+      // ITM conversion for corner labels
+      const toITM=(lat,lon)=>{
+        const a=6378137,e2=0.00669437999014,lat0=31.7343936111*Math.PI/180,lon0=35.2045169444*Math.PI/180,k0=1.0000067,x0=219529.584,y0=626907.39;
+        const e4=e2*e2,e6=e4*e2;
+        const Mf=p=>a*((1-e2/4-3*e4/64-5*e6/256)*p-(3*e2/8+3*e4/32+45*e6/1024)*Math.sin(2*p)+(15*e4/256+45*e6/1024)*Math.sin(4*p)-(35*e6/3072)*Math.sin(6*p));
+        const phi=lat*Math.PI/180,lam=lon*Math.PI/180;
+        const sp=Math.sin(phi),cp=Math.cos(phi),tp=Math.tan(phi);
+        const N1=a/Math.sqrt(1-e2*sp*sp),T1=tp*tp,C1=e2/(1-e2)*cp*cp,A1=(lam-lon0)*cp;
+        const M=Mf(phi),M0=Mf(lat0);
+        const E=Math.round(k0*N1*(A1+(1-T1+C1)*A1**3/6)+x0);
+        const N=Math.round(k0*(M-M0+N1*tp*(A1*A1/2+(5-T1+9*C1+4*C1*C1)*A1**4/24))+y0);
+        return{E,N};
+      };
+      const sw=toITM(minLat,minLon), ne=toITM(maxLat,maxLon);
+
+      // Grid lines every ~1000m ITM
+      const gridLines=[];
+      const EStep=Math.round((ne.E-sw.E)/4/500)*500||500;
+      const NStep=Math.round((ne.N-sw.N)/4/500)*500||500;
+      for(let E=Math.ceil(sw.E/EStep)*EStep;E<=ne.E;E+=EStep){
+        const lon2=minLon+(E-sw.E)/(ne.E-sw.E||1)*(maxLon-minLon);
+        const px=toSVGpt(minLat,lon2).x;
+        if(px>mapX+4&&px<mapX+mapW-4) gridLines.push(
+          `<line x1="${px.toFixed(0)}" y1="${mapY}" x2="${px.toFixed(0)}" y2="${mapY+mapH}" stroke="rgba(100,120,180,0.2)" stroke-width="0.8" stroke-dasharray="4,4"/>`+
+          `<text x="${px.toFixed(0)}" y="${mapY+mapH-4}" text-anchor="middle" font-size="9" fill="#7080B0">${E.toLocaleString()}</text>`);
+      }
+      for(let N=Math.ceil(sw.N/NStep)*NStep;N<=ne.N;N+=NStep){
+        const lat2=minLat+(N-sw.N)/(ne.N-sw.N||1)*(maxLat-minLat);
+        const py=toSVGpt(lat2,minLon).y;
+        if(py>mapY+4&&py<mapY+mapH-4) gridLines.push(
+          `<line x1="${mapX}" y1="${py.toFixed(0)}" x2="${mapX+mapW}" y2="${py.toFixed(0)}" stroke="rgba(100,120,180,0.2)" stroke-width="0.8" stroke-dasharray="4,4"/>`+
+          `<text x="${mapX+4}" y="${py.toFixed(0)}" dominant-baseline="middle" font-size="9" fill="#7080B0">${N.toLocaleString()}</text>`);
+      }
+
+      const cPt=toSVGpt((minLat+maxLat)/2,(minLon+maxLon)/2);
+      const mapSvg=`
+<rect x="${mapX}" y="${mapY}" width="${mapW}" height="${mapH}" rx="8" fill="#E8F0F8" stroke="#C8D8E8"/>
+${gridLines.join('')}
+<polygon points="${pts}" fill="rgba(83,74,183,0.18)" stroke="#534AB7" stroke-width="2"/>
+<text x="${cPt.x.toFixed(0)}" y="${(cPt.y-8).toFixed(0)}" text-anchor="middle" font-size="14" font-weight="bold" fill="#534AB7">${area}</text>
+<text x="${cPt.x.toFixed(0)}" y="${(cPt.y+10).toFixed(0)}" text-anchor="middle" font-size="10" fill="#666">${site!=='—'?site:''}</text>
+<!-- North arrow -->
+<g transform="translate(${mapX+mapW-28},${mapY+28})">
+  <circle cx="0" cy="0" r="16" fill="white" stroke="#C8D8E8" stroke-width="0.5" opacity="0.9"/>
+  <polygon points="0,-12 4,4 0,1 -4,4" fill="#534AB7"/>
+  <polygon points="0,12 4,-4 0,-1 -4,-4" fill="#aaa"/>
+  <text x="0" y="-14" text-anchor="middle" font-size="9" font-weight="bold" fill="#534AB7">N</text>
+</g>
+<rect x="${mapX}" y="${mapY}" width="${mapW}" height="20" rx="8" fill="rgba(83,74,183,0.08)"/>
+<text x="${mapX+mapW/2}" y="${mapY+14}" text-anchor="middle" font-size="10" fill="#534AB7" font-weight="bold">רשת ישראל חדשה (ITM) — E: ${sw.E.toLocaleString()}–${ne.E.toLocaleString()}  |  N: ${sw.N.toLocaleString()}–${ne.N.toLocaleString()}</text>`;
+
+      renderSVGtoPNG(svgBase+mapSvg+svgMetrics+svgDetail+svgFooter,W,H,client);
+      return;
+    }catch(e){console.error('map PNG:',e);}
+  }
+
+  renderSVGtoPNG(svgBase+svgMetrics+svgDetail+svgFooter,W,H,client);
+}
+
+function renderSVGtoPNG(svg,W,H,name){
+  const img=new Image();
+  const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=W*2; canvas.height=H*2;
+    const ctx=canvas.getContext('2d');
+    ctx.scale(2,2);
+    ctx.drawImage(img,0,0);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(b=>dlPNG(b,name),'image/png');
+  };
+  img.src=url;
+}
+function dlPNG(blob,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='תשומות-'+(name||'מיפוי')+'.png';
+  a.click();
+}
+
+function doExportPDF(){
+  const body=window._lastCalcTxt||'';
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>הערכת תשומות</title>
+  <style>body{font-family:Arial,sans-serif;padding:20px;direction:rtl;}h2{color:#534AB7;}</style></head>
+  <body><h2>הערכת תשומות מיפוי פוטוגרמטרי</h2><pre style="font-family:Arial;white-space:pre-wrap;">${body}</pre>
+  <script>window.onload=()=>{window.print();window.close();}<\/script></body></html>`);
+  w.document.close();
+}
+
+function doCopy(){
+  const txt=window._lastCalcTxt||'';
+  const btn=document.getElementById('copy-btn'),orig=btn.innerHTML;
+  if(navigator.clipboard) navigator.clipboard.writeText(txt);
+  btn.innerHTML='<i class="ti ti-check"></i> הועתק';
+  setTimeout(()=>btn.innerHTML=orig,1500);
+}
+
+// ===== NEW CALC + UNDO =====
+function snapForm(){
+  const td={};document.querySelectorAll('#terrain-rows .t-row').forEach(r=>{td[r.dataset.k]=r.querySelector('input').value;});
+  return{client:document.getElementById('f-client').value,company:document.getElementById('f-company').value,
+    area:document.getElementById('f-area').value,unit:ST.unit,scale:document.getElementById('f-scale').value,td};
+}
+function restoreSnap(s){
+  document.getElementById('f-client').value=s.client;
+  document.getElementById('f-company').value=s.company;
+  document.getElementById('f-area').value=s.area;
+  document.getElementById('f-scale').value=s.scale;
+  document.querySelectorAll('#terrain-rows .t-row').forEach(r=>{r.querySelector('input').value=s.td[r.dataset.k]||'';});
+  onArea();onTerrain();
+}
+function newCalc(){
+  undoSnap=snapForm();
+  clearForm();
+  let sec=30;
+  document.getElementById('undo-sec').textContent=sec;
+  document.getElementById('undo-bar').classList.remove('hidden');
+  if(undoTimer) clearInterval(undoTimer);
+  undoTimer=setInterval(()=>{
+    sec--;document.getElementById('undo-sec').textContent=sec;
+    if(sec<=0){clearInterval(undoTimer);document.getElementById('undo-bar').classList.add('hidden');undoSnap=null;}
+  },1000);
+}
+function undoReset(){
+  if(!undoSnap)return;
+  clearInterval(undoTimer);
+  document.getElementById('undo-bar').classList.add('hidden');
+  restoreSnap(undoSnap);undoSnap=null;
+}
+function clearForm(){
+  ['f-client','f-area','f-site','f-product'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-company').value='';
+  document.getElementById('f-product-sel').value='';
+  document.getElementById('f-product').style.display='none';
+  document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('f-scale').value='';
+  document.querySelectorAll('#terrain-rows .t-row input').forEach(i=>i.value='');
+  document.querySelectorAll('.chip.active').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('textarea').forEach(t=>{t.value='';t.classList.add('hidden');});
+  ST.grids=[];ST.specs=[];ST.formats=[];
+  setUnit('sqkm',document.querySelector('[onclick^="setUnit"]'));
+  setGCP('none',document.querySelector('[onclick^="setGCP"]'));
+  ['completion','coordination','printing','fieldCheck','aiUsed','outsource'].forEach(k=>{
+    const el=document.querySelector('[onclick*="setS(\''+k+'\',\'no\'"]');
+    if(el){ST[k]='no';document.querySelectorAll('[onclick*="setS(\''+k+'\'"]').forEach(e=>e.classList.remove('active'));el.classList.add('active');}
+  });
+  const mnew=document.querySelector('[onclick*="setS(\'mapType\',\'new\'"]');
+  if(mnew){ST.mapType='new';document.querySelectorAll('[onclick*="setS(\'mapType\'"]').forEach(e=>e.classList.remove('active'));mnew.classList.add('active');document.getElementById('update-yr').classList.add('hidden');}
+  const mfull=document.querySelector('[onclick*="setS(\'mapScope\',\'full\'"]');
+  if(mfull){ST.mapScope='full';document.querySelectorAll('[onclick*="setS(\'mapScope\'"]').forEach(e=>e.classList.remove('active'));mfull.classList.add('active');}
+  setContours('no',document.querySelector('[onclick^="setContours(\'no\'"]'));
+  setParcels('no',document.querySelector('[onclick^="setParcels(\'no\'"]'));
+  setDtm('none',document.querySelector('[onclick^="setDtm(\'none\'"]'));
+  document.getElementById('res-panel').classList.add('hidden');
+  onTerrain();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== HISTORY =====
+function addHist(e){
+  const h=getHist();h.unshift(e);if(h.length>300)h.length=300;setHist(h);
+}
+function delHist(ts){setHist(getHist().filter(e=>e.timestamp!==ts));renderHist();}
+function clearHist(){if(!confirm('למחוק את כל ההיסטוריה?'))return;setHist([]);renderHist();}
+function fmtDate(ts){const d=new Date(ts);return d.toLocaleDateString('he-IL')+' '+d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function renderHist(){
+  let list=getHist();
+  const fs=document.getElementById('f-hscale').value, fc=document.getElementById('f-hcomplex').value;
+  if(fs) list=list.filter(e=>e.scale===fs);
+  if(fc) list=list.filter(e=>e.complexity===fc);
+  const all=getHist();
+  document.getElementById('h-count').textContent=list.length+' רשומות';
+  const empty=document.getElementById('h-empty'),wrap=document.getElementById('h-tbl-wrap'),
+    acts=document.getElementById('h-actions'),stats=document.getElementById('h-stats'),
+    filters=document.getElementById('h-filters');
+  if(!all.length){empty.classList.remove('hidden');wrap.classList.add('hidden');acts.classList.add('hidden');stats.classList.add('hidden');filters.classList.add('hidden');return;}
+  empty.classList.add('hidden');wrap.classList.remove('hidden');acts.classList.remove('hidden');stats.classList.remove('hidden');filters.classList.remove('hidden');
+
+  let totA=0,totH=0;const sc={},tc={};
+  all.forEach(e=>{totA+=e.areaSqkm||0;totH+=e.hours||0;if(e.scale)sc[e.scale]=(sc[e.scale]||0)+1;if(e.tDet)Object.entries(e.tDet).forEach(([k,v])=>{if(v>0)tc[k]=(tc[k]||0)+parseFloat(v);});});
+  const rate=totA>0?totH/totA:0;
+  let topSc='—',topScN=0;Object.keys(sc).forEach(s=>{if(sc[s]>topScN){topScN=sc[s];topSc=s;}});
+  let topTc='—',topTcN=0;Object.keys(tc).forEach(k=>{if(tc[k]>topTcN){topTcN=tc[k];topTc=k;}});
+  document.getElementById('hs-area').textContent=totA.toFixed(1);
+  document.getElementById('hs-rate').textContent=rate.toFixed(1);
+  document.getElementById('hs-scale').textContent=topSc!=='—'?(SL[topSc]||topSc):'—';
+  document.getElementById('hs-scale-s').textContent=topSc!=='—'?topScN+' פרויקטים':'';
+  document.getElementById('hs-terrain').textContent=topTc!=='—'?(TL[topTc]||topTc):'—';
+
+  const cmap={נמוכה:'cl',בינונית:'cm',גבוהה:'ch'};
+  document.getElementById('h-tbody').innerHTML=list.map(e=>{
+    const nm=esc([e.client,e.company].filter(Boolean).join(' / ')||'ללא שם');
+    const dateStr=e.calcDate||fmtDate(e.timestamp).split(' ')[0];
+    return '<tr>'
+      +'<td style="white-space:nowrap;font-size:11px;">'+esc(dateStr)+'<br><span style="color:var(--txt3);font-size:10px;">'+fmtDate(e.timestamp).split(' ')[1]+'</span></td>'
+      +'<td>'+nm+'</td>'
+      +'<td style="font-size:11px;color:var(--txt2);">'+esc(e.site||'—')+'</td>'
+      +'<td style="font-size:11px;color:var(--txt2);">'+esc(e.product||'—')+'</td>'
+      +'<td>'+parseFloat(e.areaSqkm||0).toFixed(2)+'</td>'
+      +'<td>'+(SL[e.scale]||e.scale||'—')+'</td>'
+      +'<td style="font-weight:500;">'+e.hours+'</td>'
+      +'<td><span class="cb '+(cmap[e.complexity]||'cl')+'">'+e.complexity+'</span></td>'
+      +'<td style="white-space:nowrap;">'
+        +'<button class="btn-sm" onclick="loadHist('+e.timestamp+')" style="margin-left:4px;">טען</button>'
+        +'<button class="btn-sm btn-d" onclick="delHist('+e.timestamp+')">✕</button>'
+      +'</td></tr>';
+  }).join('');
+}
+function loadHist(ts){
+  const e=getHist().find(x=>x.timestamp===ts);if(!e)return;
+  document.querySelectorAll('.tab')[0].click();
+  setTimeout(()=>{
+    document.getElementById('f-client').value=e.client||'';
+    document.getElementById('f-company').value=e.company||'';
+    document.getElementById('f-site').value=e.site||'';
+    document.getElementById('f-product').value=e.product||'';
+    // Try to match dropdown
+    const sel=document.getElementById('f-product-sel');
+    const opt=[...sel.options].find(o=>o.value===e.product);
+    if(opt){sel.value=e.product;document.getElementById('f-product').style.display='none';}
+    else if(e.product){sel.value='custom';document.getElementById('f-product').style.display='';}
+    document.getElementById('f-date').value=e.calcDate||'';
+    document.getElementById('f-area').value=e.areaSqkm||'';
+    document.getElementById('f-scale').value=e.scale||'';
+    if(e.tDet) document.querySelectorAll('#terrain-rows .t-row').forEach(r=>{r.querySelector('input').value=e.tDet[r.dataset.k]||'';});
+    onArea();onTerrain();window.scrollTo({top:0,behavior:'smooth'});
+  },100);
+}
+function exportCSV(){
+  const list=getHist();if(!list.length)return;
+  const hd=['תאריך חישוב','שעת רישום','לקוח','חברה','אתר','תוצר','שטח קמ"ר','קנ"מ','שעות','ימים','מורכבות','AI'];
+  const rows=list.map(e=>[
+    e.calcDate||fmtDate(e.timestamp).split(' ')[0],
+    fmtDate(e.timestamp).split(' ')[1]||'',
+    e.client||'',e.company||'',e.site||'',e.product||'',
+    parseFloat(e.areaSqkm||0).toFixed(3),SL[e.scale]||e.scale||'',
+    e.hours,e.days,e.complexity,e.aiUsed==='yes'?'כן':'לא'
+  ]);
+  const csv='\uFEFF'+[hd,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='תשומות-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+// ===== FIREBASE REST API =====
+const FB_URL = 'https://mipuy-tashumot-default-rtdb.europe-west1.firebasedatabase.app';
+
+async function fbGet(path) {
+  try {
+    const r = await fetch(FB_URL + '/' + path + '.json');
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+async function fbSet(path, val) {
+  await fetch(FB_URL + '/' + path + '.json', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(val)
+  });
+}
+async function fbUpdate(path, val) {
+  await fetch(FB_URL + '/' + path + '.json', {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(val)
+  });
+}
+async function fbRemove(path) {
+  await fetch(FB_URL + '/' + path + '.json', { method: 'DELETE' });
+}
+
+// sync params from Firebase on load
+async function syncParamsFromFirebase() {
+  const p = await fbGet('params');
+  if (p) {
+    try { localStorage.setItem(K_PARAMS, JSON.stringify(p)); } catch(e) {}
+  }
+}
+
+// ===== RBAC — Role Based Access Control =====
+// Super Admin — קבוע בקוד בלבד
+const SUPER = { user: 'superadmin', pwd: 'Mipuy2024!', role: 'superadmin', name: 'מנהל ראשי' };
+
+// תפקידים: superadmin > admin > sales
+const ROLE_LABEL = { superadmin: '👑 מנהל ראשי', admin: '⚙️ מנהל מערכת', sales: '📊 מנהל מכירות' };
+const ROLE_COLOR = { superadmin: '#534AB7', admin: '#0EA5E9', sales: '#1D9E75' };
+
+let currentAdmin = null; // { user, name, role }
+
+function showAdminGate(){
+  document.getElementById('adm-login').classList.add('hidden');
+  document.getElementById('adm-panel').classList.add('hidden');
+  if(currentAdmin){
+    applyRoleUI();
+    renderAdminUsers();
+    if(currentAdmin.role !== 'sales') loadParamFields();
+    document.getElementById('adm-panel').classList.remove('hidden');
+  } else {
+    document.getElementById('adm-user').value='';
+    document.getElementById('adm-pwd').value='';
+    document.getElementById('adm-err').textContent='';
+    document.getElementById('adm-login').classList.remove('hidden');
+  }
+}
+
+function applyRoleUI(){
+  const role = currentAdmin.role;
+  // Badge
+  const badge = document.getElementById('adm-role-badge');
+  badge.textContent = ROLE_LABEL[role];
+  badge.style.background = ROLE_COLOR[role]+'22';
+  badge.style.color = ROLE_COLOR[role];
+  badge.style.border = '1px solid '+ROLE_COLOR[role]+'44';
+  // Name
+  document.getElementById('adm-name-lbl').textContent = currentAdmin.name;
+  // Hide params for sales
+  const paramsSec = document.getElementById('adm-params-sec');
+  if(role === 'sales'){
+    paramsSec.classList.add('hidden');
+  } else {
+    paramsSec.classList.remove('hidden');
+  }
+  // Hide admin-role option for non-superadmin
+  const rbAdmin = document.getElementById('rb-admin-role');
+  if(role !== 'superadmin'){
+    rbAdmin.style.display = 'none';
+  } else {
+    rbAdmin.style.display = '';
+  }
+  // Hide add-user section for sales
+  document.getElementById('adm-users-sec').classList.toggle('hidden', role === 'sales');
+}
+
+async function doLogin(){
+  const user = document.getElementById('adm-user').value.trim();
+  const pwd  = document.getElementById('adm-pwd').value;
+  const err  = document.getElementById('adm-err');
+  if(!user || !pwd){ err.textContent='נא למלא שם משתמש וסיסמה'; return; }
+  err.textContent='מתחבר...';
+
+  // בדוק Super Admin קודם
+  if(user === SUPER.user && pwd === SUPER.pwd){
+    currentAdmin = { user: SUPER.user, name: SUPER.name, role: 'superadmin' };
+    document.getElementById('adm-pwd').value='';
+    err.textContent='';
+    showAdminGate();
+    return;
+  }
+
+  // בדוק ב-Firebase
+  const admins = await fbGet('admins') || {};
+  const found = admins[user];
+  if(found && found.pwd === pwd){
+    currentAdmin = { user, name: found.name||user, role: found.role||'sales' };
+    document.getElementById('adm-pwd').value='';
+    err.textContent='';
+    showAdminGate();
+  } else {
+    err.textContent='❌ שם משתמש או סיסמה שגויים';
+    setTimeout(()=>err.textContent='',3000);
+  }
+}
+
+function doLogout(){
+  currentAdmin = null;
+  showAdminGate();
+}
+
+async function renderAdminUsers(){
+  const admins = await fbGet('admins') || {};
+  const list = document.getElementById('adm-users-list');
+  const role = currentAdmin.role;
+
+  // Super Admin always first
+  let html = `<div class="user-row">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:13px;font-weight:600;">${SUPER.name}</span>
+      <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${ROLE_COLOR.superadmin}22;color:${ROLE_COLOR.superadmin};border:1px solid ${ROLE_COLOR.superadmin}44;">${ROLE_LABEL.superadmin}</span>
+      ${currentAdmin.user===SUPER.user?'<span class="badge-you">אתה</span>':''}
+    </div>
+    <span style="font-size:11px;color:var(--txt3);">לא ניתן לשינוי</span>
+  </div>`;
+
+  // Firebase users
+  Object.entries(admins).forEach(([u,d])=>{
+    const uRole = d.role||'sales';
+    const isMe = u === currentAdmin.user;
+    const canDel = role==='superadmin' || (role==='admin' && uRole==='sales');
+    const canEdit = role==='superadmin';
+    html += `<div class="user-row">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;">
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:13px;font-weight:600;">${esc(d.name||u)}</span>
+            <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${ROLE_COLOR[uRole]}22;color:${ROLE_COLOR[uRole]};border:1px solid ${ROLE_COLOR[uRole]}44;">${ROLE_LABEL[uRole]}</span>
+            ${isMe?'<span class="badge-you">אתה</span>':''}
+          </div>
+          <div style="font-size:11px;color:var(--txt3);margin-top:2px;" dir="ltr">שם כניסה: ${esc(u)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        ${canDel&&!isMe?`<button class="btn-sm btn-d" onclick="removeAdmin('${esc(u)}')"><i class="ti ti-trash"></i> הסר</button>`:''}
+        ${isMe?'<span style="font-size:11px;color:var(--txt3);">לא ניתן להסיר עצמך</span>':''}
+      </div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+async function addAdmin(){
+  const name = document.getElementById('new-adm-name').value.trim();
+  const user = document.getElementById('new-adm-user').value.trim().toLowerCase().replace(/\s+/g,'');
+  const pwd  = document.getElementById('new-adm-pwd').value;
+  const msg  = document.getElementById('add-adm-msg');
+  const activeRb = document.querySelector('#new-adm-role-grp .rb.active');
+  const role = activeRb ? activeRb.dataset.role : 'sales';
+
+  if(!name){ msg.style.color='var(--red-t)'; msg.textContent='נא להזין שם מלא'; return; }
+  if(!user){ msg.style.color='var(--red-t)'; msg.textContent='נא להזין שם כניסה'; return; }
+  if(!/^[a-z0-9_.-]+$/.test(user)){ msg.style.color='var(--red-t)'; msg.textContent='שם כניסה — אותיות לועזיות/ספרות בלבד'; return; }
+  if(pwd.length<4){ msg.style.color='var(--red-t)'; msg.textContent='סיסמה — לפחות 4 תווים'; return; }
+  if(user === SUPER.user){ msg.style.color='var(--red-t)'; msg.textContent='שם משתמש שמור למערכת'; return; }
+
+  if(role==='admin' && currentAdmin.role!=='superadmin'){
+    msg.style.color='var(--red-t)'; msg.textContent='רק מנהל ראשי יכול להוסיף מנהל מערכת'; return;
+  }
+
+  const admins = await fbGet('admins')||{};
+  if(admins[user]){ msg.style.color='var(--red-t)'; msg.textContent='שם כניסה "'+user+'" כבר קיים במערכת'; return; }
+
+  msg.style.color='var(--txt2)'; msg.textContent='שומר...';
+  await fbSet('admins/'+user, { name, pwd, role, created: Date.now(), createdBy: currentAdmin.user });
+
+  document.getElementById('new-adm-name').value='';
+  document.getElementById('new-adm-user').value='';
+  document.getElementById('new-adm-pwd').value='';
+
+  // Show clear success with login details
+  msg.style.color='var(--grn-t)';
+  msg.innerHTML=`✓ <strong>${name}</strong> נוסף בהצלחה!<br>
+    <div style="margin-top:6px;background:var(--bg2);border-radius:6px;padding:8px 10px;font-size:12px;border-right:3px solid var(--grn);">
+      <div>📧 שם כניסה: <strong dir="ltr">${user}</strong></div>
+      <div>🔑 סיסמה: <strong>${pwd}</strong></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:4px;">העבר/י פרטים אלו למשתמש בצורה מאובטחת</div>
+    </div>`;
+  setTimeout(()=>msg.innerHTML='',10000);
+  renderAdminUsers();
+}
+
+// Role radio buttons in add-user form
+document.querySelectorAll('#new-adm-role-grp .rb').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('#new-adm-role-grp .rb').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+});
+
+async function removeAdmin(user){
+  if(!confirm('להסיר את המשתמש '+user+'?'))return;
+  await fbRemove('admins/'+user);
+  renderAdminUsers();
+}
+
+async function changePwd(){
+  const p1=document.getElementById('chg-p1').value, p2=document.getElementById('chg-p2').value;
+  const msg=document.getElementById('pwd-msg');
+  if(!p1){ msg.style.color='var(--red-t)'; msg.textContent='הכנס סיסמה חדשה'; return; }
+  if(p1.length<4){ msg.style.color='var(--red-t)'; msg.textContent='לפחות 4 תווים'; return; }
+  if(p1!==p2){ msg.style.color='var(--red-t)'; msg.textContent='הסיסמאות אינן תואמות'; return; }
+  if(currentAdmin.user===SUPER.user){
+    msg.style.color='var(--red-t)'; msg.textContent='לא ניתן לשנות סיסמת מנהל ראשי כאן'; return;
+  }
+  msg.textContent='שומר...';
+  await fbUpdate('admins/'+currentAdmin.user, {pwd:p1});
+  msg.style.color='var(--grn-t)'; msg.textContent='✓ הסיסמה עודכנה';
+  document.getElementById('chg-p1').value=''; document.getElementById('chg-p2').value='';
+  setTimeout(()=>msg.textContent='',2000);
+}
+
+
+// ===== PARAMS (Firebase + localStorage fallback) =====
+async function loadParamFields(){
+  // try Firebase first, fall back to localStorage
+  const fbParams=await fbGet('params');
+  const p=fbParams||getP();
+  const map={base:'p-base',ai:'p-ai',mabat:'p-mabat',update:'p-update',plani:'p-plani',
+    gcpArch:'p-gcp-arch',gcpPer:'p-gcp-per',cont:'p-cont',parc:'p-parc',print:'p-print',
+    comp:'p-comp',coord:'p-coord',field:'p-field',spec:'p-spec',fmt:'p-fmt',
+    hoursPerDay:'p-hours-day',hoursPerShift:'p-hours-shift',outsourcePartial:'p-outsource-partial',outsourceFull:'p-outsource-full'};
+  Object.entries(map).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.value=p[k];});
+  Object.keys(DEF.tf).forEach(k=>{const el=document.getElementById('tf-'+k);if(el)el.value=(p.tf||DEF.tf)[k];});
+  Object.keys(DEF.sf).forEach(k=>{const el=document.getElementById('sf-'+k);if(el)el.value=(p.sf||DEF.sf)[k];});
+}
+
+async function saveParams(){
+  const p=getP();
+  const map={base:'p-base',ai:'p-ai',mabat:'p-mabat',update:'p-update',plani:'p-plani',
+    gcpArch:'p-gcp-arch',gcpPer:'p-gcp-per',cont:'p-cont',parc:'p-parc',print:'p-print',
+    comp:'p-comp',coord:'p-coord',field:'p-field',spec:'p-spec',fmt:'p-fmt',
+    hoursPerDay:'p-hours-day',hoursPerShift:'p-hours-shift',outsourcePartial:'p-outsource-partial',outsourceFull:'p-outsource-full'};
+  Object.entries(map).forEach(([k,id])=>{const el=document.getElementById(id);if(el){const v=parseFloat(el.value);if(!isNaN(v))p[k]=v;}});
+  Object.keys(DEF.tf).forEach(k=>{const el=document.getElementById('tf-'+k);if(el){const v=parseFloat(el.value);if(!isNaN(v))p.tf[k]=v;}});
+  Object.keys(DEF.sf).forEach(k=>{const el=document.getElementById('sf-'+k);if(el){const v=parseFloat(el.value);if(!isNaN(v))p.sf[k]=v;}});
+  setP(p);
+  const msg=document.getElementById('save-msg');
+  msg.textContent='שומר...';
+  try{
+    await fbSet('params',p);
+    msg.style.color='var(--grn-t)';msg.textContent='✓ הפרמטרים נשמרו ב-Firebase — יעודכנו לכל המשתמשים';
+  }catch(e){
+    msg.style.color='var(--amb-t)';msg.textContent='נשמר מקומית בלבד (בדוק חיבור אינטרנט)';
+  }
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+async function resetParams(){
+  if(!confirm('לאפס לברירת מחדל?'))return;
+  const def=JSON.parse(JSON.stringify(DEF));
+  setP(def);
+  await fbSet('params',def);
+  loadParamFields();
+  const msg=document.getElementById('save-msg');
+  msg.style.color='var(--amb-t)';msg.textContent='אופס לברירת מחדל';
+  setTimeout(()=>msg.textContent='',2000);
+}
+
+// ===== WORKING DAYS CALCULATOR =====
+// workWeek: array of weekday numbers that are work days (0=Sun, 1=Mon, ... 6=Sat)
+const WORK_WEEKS = {
+  IL: [0,1,2,3,4],      // א׳-ה׳ (Sun-Thu)
+  US: [1,2,3,4,5],      // Mon-Fri
+  EU: [1,2,3,4,5],      // Mon-Fri
+  AE: [0,1,2,3,4],      // Sun-Thu (like Israel)
+  SA: [0,1,2,3,4],      // Sun-Thu
+};
+const WORK_HOURS_DAY = { IL:8, US:8, EU:8, AE:8, SA:7 };
+
+// Israeli public holidays (approx, year-agnostic by month/day)
+const IL_HOLIDAYS_2024 = [
+  '2024-04-22','2024-04-23','2024-04-29','2024-04-30', // פסח
+  '2024-05-13','2024-05-14', // שבועות
+  '2024-09-16','2024-09-17', // ראש השנה
+  '2024-09-25', // יום כיפור
+  '2024-09-30','2024-10-01','2024-10-07','2024-10-08', // סוכות
+  '2025-04-12','2025-04-13','2025-04-19','2025-04-20', // פסח
+  '2025-06-01','2025-06-02', // שבועות
+  '2025-09-22','2025-09-23', // ראש השנה
+  '2025-10-01', // יום כיפור
+  '2025-10-05','2025-10-06','2025-10-12','2025-10-13', // סוכות
+  '2026-04-01','2026-04-02','2026-04-08','2026-04-09', // פסח
+  '2026-05-21','2026-05-22', // שבועות
+];
+
+function calcBusinessDays(totalHours, hoursPerDay, country){
+  const workWeek = WORK_WEEKS[country] || WORK_WEEKS.IL;
+  const daysNeeded = Math.ceil(totalHours / hoursPerDay);
+  const startDateVal = document.getElementById('f-date').value;
+  const startDate = startDateVal ? new Date(startDateVal) : new Date();
+
+  // Count business days from start date
+  let bizDaysFound = 0, calDays = 0, endDate = new Date(startDate);
+  while(bizDaysFound < daysNeeded){
+    const dow = endDate.getDay();
+    const dateStr = endDate.toISOString().slice(0,10);
+    const isWorkDay = workWeek.includes(dow);
+    const isHoliday = country==='IL' && IL_HOLIDAYS_2024.includes(dateStr);
+    if(isWorkDay && !isHoliday) bizDaysFound++;
+    if(bizDaysFound < daysNeeded){
+      endDate.setDate(endDate.getDate()+1);
+      calDays++;
+    }
+  }
+
+  const endStr = endDate.toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+  return { bizDays: daysNeeded, calDays, endDate: endStr };
+}
+
+const COUNTRY_NAMES = { IL:'ישראל', US:'ארה״ב', EU:'אירופה', AE:'אמירויות', SA:'סעודיה' };
+const HELP = {
+  outsourcePartial:{ t:'מקדם קב"ל חלקי', b:'מכפיל תשומות כאשר חלק מהעבודה מבוצע על ידי ספק חיצוני. כולל עלויות תיאום, בקרה ועיבוד נתונים חלקי.', ex:'ערך 1.15 = 15% תוספת על סה"כ התשומות.' },
+  outsourceFull:{ t:'מקדם קב"ל מלא', b:'מכפיל תשומות כאשר כל הביצוע מבוצע על ידי ספק חיצוני. כולל ניהול מלא, בקרת איכות ותיאום רציף.', ex:'ערך 1.35 = 35% תוספת על סה"כ התשומות.' },
+  hoursPerDay:{ t:'שעות ביום עבודה', b:'מספר שעות העבודה ביום עבודה סטנדרטי. משמש לחישוב ימי העבודה הנדרשים.', ex:'ערך 8 → 40 שעות = 5 ימים. ערך 9 → 40 שעות = 5 ימים (מעוגל למעלה).' },
+  hoursPerShift:{ t:'שעות במשמרת', b:'מספר שעות בכל משמרת עבודה. שימושי כאשר הצוות עובד במשמרות שאינן יום עבודה שלם.', ex:'ערך 8 → 40 שע׳ = 5 משמרות. ערך 4 → 40 שע׳ = 10 משמרות.' },
+  base:{ t:'שעות בסיס לקמ״ר', b:'מספר שעות העבודה הנדרשות למיפוי קמ״ר אחד בתנאי שטח ממוצעים ובקנ״מ הבסיסי. כל שאר המקדמים מכפילים ערך זה.', ex:'ערך טיפוסי: 10–16 שע׳/קמ״ר. לפרויקט 2 קמ״ר עם ערך 12 → 24 שעות בסיס.' },
+  ai:{ t:'הנחת AI (%)', b:'אחוז ההפחתה בתשומות כאשר נעשה שימוש בכלי בינה מלאכותית בתהליך (זיהוי אוטומטי, סיווג, וכד׳). מופחת מסך כל התשומות בסוף החישוב.', ex:'ערך 20% → פרויקט של 100 שע׳ יחושב כ-80 שע׳.' },
+  mabat:{ t:'תוספת מבא״ת (%)', b:'תוספת אחוזית לפרויקטים הדורשים עמידה בתקן מבא״ת (מפרט בסיסי טופוגרפי). מבא״ת דורש דיוק ופירוט גבוהים יותר המגדילים את התשומות.', ex:'ערך 15% → פרויקט 100 שע׳ עם מבא״ת → 115 שע׳.' },
+  update:{ t:'מקדם עדכון מיפוי', b:'מקדם להכפלה כאשר מדובר בעדכון מיפוי קיים (לא מיפוי חדש מאפס). מיפוי עדכון דורש פחות עבודה כי תשתית קיימת.', ex:'ערך 0.6 → עדכון מיפוי דורש 60% מזמן מיפוי חדש.' },
+  plani:{ t:'מקדם פלנימטריה', b:'מקדם להכפלה כאשר מדובר בפלנימטריה בלבד (ללא מידע גובה/טופוגרפיה). עבודה מופחתת לעומת מיפוי מלא.', ex:'ערך 0.7 → פלנימטריה דורשת 70% מזמן מיפוי מלא.' },
+  gcpArch:{ t:'GCP ארכיון (שע׳)', b:'שעות עבודה לבדיקת נקודות בקרה קיימות בארכיון — כאשר אין צורך לצאת לשטח אבל יש לאמת נקודות ממסמכים קיימים.', ex:'ערך 4 → 4 שע׳ נוספות לבדיקת ארכיון GCP.' },
+  gcpPer:{ t:'GCP לביצוע (שע׳/נקודה)', b:'שעות עבודה לכל נקודת בקרה (GCP) שיש לבצע בשטח — כולל הגעה, מדידה, עיבוד ותיעוד.', ex:'ערך 2.5 → 10 נקודות = 25 שע׳ תוספת.' },
+  cont:{ t:'קווי גובה (שע׳/קמ״ר)', b:'תוספת שעות לקמ״ר עבור הפקת קווי גובה. תלויה באינטרוול ובמורכבות הטופוגרפיה.', ex:'ערך 3 → 2 קמ״ר עם קווי גובה = 6 שע׳ תוספת.' },
+  parc:{ t:'גושים וחלקות (שע׳/קמ״ר)', b:'תוספת שעות לקמ״ר עבור שילוב ועיבוד שכבת גושים וחלקות (רישום מקרקעין) במיפוי.', ex:'ערך 2 → 3 קמ״ר = 6 שע׳ תוספת.' },
+  print:{ t:'הדפסת מפות (שע׳)', b:'שעות עבודה קבועות להכנה ועיצוב המפה להדפסה — ללא קשר לגודל השטח.', ex:'ערך 4 → תמיד 4 שע׳ נוספות אם נדרשת הדפסה.' },
+  comp:{ t:'השלמות שטח (שע׳/קמ״ר)', b:'תוספת שעות לקמ״ר עבור השלמת אזורים חסרים — לרוב אזורים מוסתרים, מבנים שדורשים מדידה ידנית וכד׳.', ex:'ערך 1.5 → 2 קמ״ר = 3 שע׳ תוספת.' },
+  coord:{ t:'תיאום (שע׳)', b:'שעות עבודה קבועות לתיאום עם גורמים חיצוניים — רשויות, בעלי קרקע, ספקים. ערך קבוע ללא קשר לגודל.', ex:'ערך 6 → תמיד 6 שע׳ נוספות אם נדרש תיאום.' },
+  field:{ t:'תיקוף שטח (שע׳)', b:'שעות קבועות לתיקוף תוצרי המיפוי בשטח על ידי מודד מוסמך — בדיקת דיוק ואיכות.', ex:'ערך 4 → תמיד 4 שע׳ לתיקוף שטח.' },
+  spec:{ t:'מפרט נוסף (שע׳)', b:'תוספת שעות קבועת לכל מפרט הגשה נוסף מעבר למפרט הראשון (מפ״י, 827, BN וכד׳). כל מפרט נוסף מוסיף ערך זה.', ex:'ערך 3 → 2 מפרטים נוספים = 6 שע׳.' },
+  fmt:{ t:'פורמט נוסף (שע׳)', b:'תוספת שעות לכל פורמט הגשה נוסף מעבר לפורמט הראשון (DWG, SHP, PDF וכד׳). הפורמט הראשון כלול בבסיס.', ex:'ערך 2 → 3 פורמטים = 2 שע׳ תוספת (על הפורמט השני והשלישי).' },
+  'tf-open':{ t:'מקדם שטח פתוח / טבעי', b:'מקדם הכפלה לאזורים פתוחים — שדות, יערות, אזורים טבעיים ללא עומס אורבני. בדרך כלל הנמוך ביותר.', ex:'ערך 1.0 = ברירת מחדל, ללא תוספת. ערך 1.1 = תוספת 10%.' },
+  'tf-agri':{ t:'מקדם חקלאי / כפרי', b:'מקדם לאזורים חקלאיים — פרדסים, שדות מעובדים, כפרים. מורכבות בינונית-נמוכה.', ex:'ערך 1.1 → 10% יותר שעות מאשר שטח פתוח.' },
+  'tf-mountain':{ t:'מקדם הררי', b:'מקדם לאזורים הרריים — שיפועים, צמחייה צפופה, גישה מוגבלת. קשה יותר לצילום ולעיבוד.', ex:'ערך 1.4 → 40% יותר שעות מאשר שטח פתוח.' },
+  'tf-urban-light':{ t:'מקדם אורבני מרווח', b:'מקדם לאזורים עירוניים בנויים חלקית — שכונות מגורים נמוכות, פרברים. מורכבות בינונית.', ex:'ערך 1.3 → 30% יותר שעות מאשר שטח פתוח.' },
+  'tf-urban-dense':{ t:'מקדם אורבני צפוף', b:'מקדם לאזורים עירוניים צפופים — מרכז עיר, בנייה רוויה, הרבה חסימות ואתגרים. הגבוה ביותר.', ex:'ערך 1.6 → 60% יותר שעות מאשר שטח פתוח.' },
+  'tf-industrial':{ t:'מקדם תעשייתי / מסחרי', b:'מקדם לאזורים תעשייתיים ומסחריים — מחסנים, מפעלים, מרכזי קניות. מורכבות גבוהה עקב מבנים גדולים ואי-נגישות.', ex:'ערך 1.25 → 25% יותר שעות מאשר שטח פתוח.' },
+};
+
+const SF_HELP = {
+  '250':{ t:'מקדם קנ״מ 1:250', b:'מקדם הכפלה למיפוי בקנ״מ 1:250 — הגדול ביותר, רמת פירוט גבוהה מאוד. שימוש: פרויקטים עירוניים, תשתיות, בינוי.', ex:'ערך 2.2 → פי 2.2 מהבסיס. לעומת 1:1000: יותר פרטים, יותר זמן.' },
+  '500':{ t:'מקדם קנ״מ 1:500', b:'מקדם למיפוי 1:500 — קנ״מ נפוץ לפרויקטי תכנון ובינוי. רמת פירוט גבוהה.', ex:'ערך 1.8 → 80% יותר מהבסיס.' },
+  '1000':{ t:'מקדם קנ״מ 1:1,000', b:'מקדם למיפוי 1:1,000 — קנ״מ סטנדרטי לפרויקטים רבים. ברירת מחדל נפוצה.', ex:'ערך 1.4 → 40% יותר מהבסיס.' },
+  '2500':{ t:'מקדם קנ״מ 1:2,500', b:'מקדם למיפוי 1:2,500 — קנ״מ לפרויקטים גדולים יחסית עם רמת פירוט בינונית.', ex:'ערך 1.1 → 10% יותר מהבסיס.' },
+  '5000':{ t:'מקדם קנ״מ 1:5,000', b:'מקדם למיפוי 1:5,000 — פרויקטים נרחבים, פחות פירוט. נפוץ לתכנון אזורי.', ex:'ערך 0.85 → 15% פחות מהבסיס.' },
+  '10000':{ t:'מקדם קנ״מ 1:10,000', b:'מקדם למיפוי 1:10,000 — קנ״מ קטן, שטחים גדולים, פירוט מינימלי. נפוץ לסקרים אזוריים.', ex:'ערך 0.7 → 30% פחות מהבסיס.' },
+};
+
+function showHelp(key){
+  const h=HELP[key]||SF_HELP[key];
+  if(!h)return;
+  document.getElementById('help-title').textContent=h.t;
+  document.getElementById('help-body').textContent=h.b;
+  const exEl=document.getElementById('help-ex');
+  if(h.ex){exEl.style.display='block';exEl.textContent='דוגמה: '+h.ex;}
+  else exEl.style.display='none';
+  document.getElementById('help-modal-bg').classList.remove('hidden');
+}
+function closeHelp(){
+  document.getElementById('help-modal-bg').classList.add('hidden');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
+renderHist();
+refreshAINote();
+syncParamsFromFirebase().then(()=>{ refreshAINote(); });
+showAdminGate();
+document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+const aoiArea=localStorage.getItem('aoi_send_area');
+if(aoiArea){
+  document.getElementById('f-area').value=parseFloat(aoiArea).toFixed(4);
+  onArea();localStorage.removeItem('aoi_send_area');
+  const av=document.getElementById('f-area');
+  av.style.outline='3px solid var(--pur)';
+  setTimeout(()=>av.style.outline='',2500);
+}
+</script>
+</body>
+</html>
